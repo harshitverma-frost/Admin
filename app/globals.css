@@ -1,0 +1,62 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-primary: #722F37;
+  --color-primary-dark: #5A252C;
+  --color-primary-light: #8B3A42;
+  --color-sidebar-bg: #1E1B1A;
+  --color-sidebar-hover: #2D2926;
+  --color-sidebar-active: #722F37;
+  --color-card-bg: #FFFFFF;
+  --color-page-bg: #F8F6F3;
+  --color-border: #E8E2DA;
+  --color-text-primary: #2D2926;
+  --color-text-secondary: #6B6462;
+  --color-text-muted: #9C9694;
+  --color-success: #16A34A;
+  --color-warning: #D97706;
+  --color-danger: #DC2626;
+  --color-info: #2563EB;
+  --font-serif: 'Playfair Display', Georgia, serif;
+  --font-sans: 'Inter', system-ui, sans-serif;
+}
+
+:root {
+  --background: #F8F6F3;
+  --foreground: #2D2926;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+}
+
+::-webkit-scrollbar {
+  width: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: #F8F6F3;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #C9A96E;
+  border-radius: 3px;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg, #E8E2DA 25%, #F0EBE3 50%, #E8E2DA 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
