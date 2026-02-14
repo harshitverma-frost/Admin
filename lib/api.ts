@@ -1,10 +1,10 @@
 /**
  * Admin API Client
- * Backend: http://localhost:5000
+ * Backend: https://ecommerce-backend-h23p.onrender.com
  * Response format: { success: boolean, message: string, data: T }
  */
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://ecommerce-backend-h23p.onrender.com';
 
 export interface ApiResponse<T = unknown> {
     success: boolean;
