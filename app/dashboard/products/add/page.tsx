@@ -1,15 +1,24 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { createProduct } from '@/lib/api';
-import { ArrowLeft, Save } from 'lucide-react';
+import { createProduct, uploadProductImage } from '@/lib/api';
+import { ArrowLeft, Save, Upload, X, ImageIcon } from 'lucide-react';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
+
+interface ImagePreview {
+    file: File;
+    base64: string;
+    preview: string;
+}
 
 export default function AddProductPage() {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
+    const [images, setImages] = useState<ImagePreview[]>([]);
+    const [uploadingImages, setUploadingImages] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
     const [form, setForm] = useState({
         sku: '',
         product_name: '',
@@ -24,6 +33,52 @@ export default function AddProductPage() {
     });
 
     const update = (field: string, value: string) => setForm(prev => ({ ...prev, [field]: value }));
+
+    const fileToBase64 = (file: File): Promise<string> => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result as string);
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+        });
+    };
+
+    const handleFileSelect = async (files: FileList | null) => {
+        if (!files) return;
+        const newImages: ImagePreview[] = [];
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            if (!file.type.startsWith('image/')) {
+                toast.error(`${file.name} is not an image file`);
+                continue;
+            }
+            if (file.size > 5 * 1024 * 1024) {
+                toast.error(`${file.name} is too large (max 5MB)`);
+                continue;
+            }
+            const base64 = await fileToBase64(file);
+            newImages.push({
+                file,
+                base64,
+                preview: URL.createObjectURL(file),
+            });
+        }
+        setImages(prev => [...prev, ...newImages]);
+    };
+
+    const removeImage = (index: number) => {
+        setImages(prev => {
+            const updated = [...prev];
+            URL.revokeObjectURL(updated[index].preview);
+            updated.splice(index, 1);
+            return updated;
+        });
+    };
+
+    const handleDrop = (e: React.DragEvent) => {
+        e.preventDefault();
+        handleFileSelect(e.dataTransfer.files);
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -45,14 +100,39 @@ export default function AddProductPage() {
             price: form.price ? parseFloat(form.price) : undefined,
             quantity: form.quantity ? parseInt(form.quantity) : undefined,
         });
-        setLoading(false);
 
-        if (result.success) {
-            toast.success('Product created successfully!');
-            router.push('/dashboard/products');
-        } else {
+        if (!result.success) {
+            setLoading(false);
             toast.error(result.error || 'Failed to create product');
+            return;
         }
+
+        // Upload images if any were selected
+        if (images.length > 0 && result.product?.product_id) {
+            setUploadingImages(true);
+            let successCount = 0;
+            for (let i = 0; i < images.length; i++) {
+                const imgResult = await uploadProductImage(
+                    result.product.product_id,
+                    images[i].base64,
+                    { is_primary: i === 0, file_name: images[i].file.name }
+                );
+                if (imgResult.success) {
+                    successCount++;
+                } else {
+                    toast.error(`Failed to upload ${images[i].file.name}`);
+                }
+            }
+            setUploadingImages(false);
+            if (successCount > 0) {
+                toast.success(`Product created with ${successCount} image(s)!`);
+            }
+        } else {
+            toast.success('Product created successfully!');
+        }
+
+        setLoading(false);
+        router.push('/dashboard/products');
     };
 
     const categories = ['Red Wine', 'White Wine', 'Rosé', 'Sparkling', 'Dessert Wine', 'Fortified'];
@@ -193,17 +273,68 @@ export default function AddProductPage() {
                             </div>
                         </div>
                     </div>
+
+                    {/* Product Images */}
+                    <div>
+                        <h3 className="font-serif text-sm font-semibold text-text-primary mb-4">Product Images</h3>
+                        <div
+                            onDrop={handleDrop}
+                            onDragOver={e => e.preventDefault()}
+                            onClick={() => fileInputRef.current?.click()}
+                            className="border-2 border-dashed border-border rounded-xl p-8 text-center cursor-pointer hover:border-primary hover:bg-primary/5 transition-all"
+                        >
+                            <Upload className="h-8 w-8 text-text-secondary mx-auto mb-3" />
+                            <p className="text-sm font-medium text-text-primary">Click to upload or drag & drop</p>
+                            <p className="text-xs text-text-secondary mt-1">PNG, JPG, WebP up to 5MB each</p>
+                            <input
+                                ref={fileInputRef}
+                                type="file"
+                                accept="image/jpeg,image/png,image/webp,image/gif"
+                                multiple
+                                onChange={e => handleFileSelect(e.target.files)}
+                                className="hidden"
+                            />
+                        </div>
+
+                        {/* Image Previews */}
+                        {images.length > 0 && (
+                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-4">
+                                {images.map((img, index) => (
+                                    <div key={index} className="relative group rounded-lg overflow-hidden border border-border bg-white">
+                                        <img
+                                            src={img.preview}
+                                            alt={img.file.name}
+                                            className="w-full h-28 object-cover"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => removeImage(index)}
+                                            className="absolute top-1.5 right-1.5 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity shadow-md"
+                                        >
+                                            <X className="h-3.5 w-3.5" />
+                                        </button>
+                                        <div className="px-2 py-1.5">
+                                            <p className="text-xs text-text-secondary truncate">{img.file.name}</p>
+                                            {index === 0 && (
+                                                <span className="text-[10px] font-semibold text-primary">Primary</span>
+                                            )}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
                 </div>
 
                 {/* Actions */}
                 <div className="mt-6 flex items-center gap-3">
                     <button
                         type="submit"
-                        disabled={loading}
+                        disabled={loading || uploadingImages}
                         className="flex items-center gap-2 rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-white hover:bg-primary-dark transition-colors disabled:opacity-50"
                     >
                         <Save className="h-4 w-4" />
-                        {loading ? 'Creating...' : 'Create Product'}
+                        {uploadingImages ? 'Uploading Images...' : loading ? 'Creating...' : 'Create Product'}
                     </button>
                     <Link
                         href="/dashboard/products"

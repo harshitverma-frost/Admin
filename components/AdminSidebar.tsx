@@ -4,91 +4,179 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAdminAuth } from '@/context/AdminAuthContext';
 import {
-    LayoutDashboard, Package, ShoppingCart, Tag, LogOut, Wine, ChevronLeft, Menu,
+    LayoutDashboard, Package, ShoppingCart, Tag, LogOut, Wine,
+    ChevronLeft, Menu, Truck, Megaphone, BarChart3, Settings, Users, X,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
-const navItems = [
+const mainNav = [
     { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { href: '/dashboard/products', label: 'Products', icon: Package },
+    { href: '/dashboard/products', label: 'Inventory', icon: Package },
     { href: '/dashboard/orders', label: 'Orders', icon: ShoppingCart },
     { href: '/dashboard/categories', label: 'Categories', icon: Tag },
 ];
 
-export default function AdminSidebar() {
+const secondaryNav = [
+    { href: '#', label: 'Customers', icon: Users },
+    { href: '#', label: 'Delivery', icon: Truck },
+    { href: '#', label: 'Promotions', icon: Megaphone },
+];
+
+const bottomNav = [
+    { href: '#', label: 'Analytics', icon: BarChart3 },
+    { href: '#', label: 'Settings', icon: Settings },
+];
+
+interface AdminSidebarProps {
+    collapsed: boolean;
+    onToggle: () => void;
+}
+
+export default function AdminSidebar({ collapsed, onToggle }: AdminSidebarProps) {
     const pathname = usePathname();
     const { user, logout } = useAdminAuth();
-    const [collapsed, setCollapsed] = useState(false);
+    const [mobileOpen, setMobileOpen] = useState(false);
+
+    // Close mobile sidebar on route change
+    useEffect(() => {
+        setMobileOpen(false);
+    }, [pathname]);
+
+    // Lock body scroll on mobile
+    useEffect(() => {
+        document.body.style.overflow = mobileOpen ? 'hidden' : '';
+        return () => { document.body.style.overflow = ''; };
+    }, [mobileOpen]);
+
+    const renderNavItem = (item: { href: string; label: string; icon: typeof LayoutDashboard }, isCollapsed: boolean) => {
+        const isActive = item.href === '/dashboard'
+            ? pathname === '/dashboard'
+            : pathname.startsWith(item.href) && item.href !== '#';
+        const Icon = item.icon;
+
+        return (
+            <Link
+                key={item.label}
+                href={item.href}
+                className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 ${isActive
+                        ? 'bg-white/15 text-white shadow-sm'
+                        : 'text-white/50 hover:bg-white/8 hover:text-white/80'
+                    } ${isCollapsed ? 'justify-center' : ''}`}
+                title={isCollapsed ? item.label : undefined}
+            >
+                <Icon className="h-[18px] w-[18px] flex-shrink-0" />
+                {!isCollapsed && <span>{item.label}</span>}
+            </Link>
+        );
+    };
+
+    const sidebarContent = (isCollapsed: boolean) => (
+        <>
+            {/* Logo */}
+            <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'} px-4 py-5 border-b border-white/8`}>
+                {!isCollapsed && (
+                    <Link href="/dashboard" className="flex items-center gap-2.5">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary-light">
+                            <Wine className="h-4 w-4 text-white" />
+                        </div>
+                        <span className="font-serif text-lg font-bold text-white">KSP Admin</span>
+                    </Link>
+                )}
+                {isCollapsed && (
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary-light">
+                        <Wine className="h-4 w-4 text-white" />
+                    </div>
+                )}
+            </div>
+
+            {/* Main nav */}
+            <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+                {!isCollapsed && (
+                    <p className="px-3 mb-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/30">
+                        Main
+                    </p>
+                )}
+                {mainNav.map(item => renderNavItem(item, isCollapsed))}
+
+                <div className="my-3 border-t border-white/8" />
+
+                {!isCollapsed && (
+                    <p className="px-3 mb-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/30">
+                        Management
+                    </p>
+                )}
+                {secondaryNav.map(item => renderNavItem(item, isCollapsed))}
+
+                <div className="my-3 border-t border-white/8" />
+
+                {!isCollapsed && (
+                    <p className="px-3 mb-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/30">
+                        System
+                    </p>
+                )}
+                {bottomNav.map(item => renderNavItem(item, isCollapsed))}
+            </nav>
+
+            {/* Footer */}
+            <div className="border-t border-white/8 px-3 py-4">
+                {!isCollapsed && user && (
+                    <div className="mb-3 px-3">
+                        <p className="text-sm font-medium text-white/80 truncate">{user.name}</p>
+                        <p className="text-[11px] text-white/35 truncate">{user.email}</p>
+                    </div>
+                )}
+                <button
+                    onClick={logout}
+                    className={`flex items-center gap-3 w-full rounded-xl px-3 py-2.5 text-sm font-medium text-white/50 hover:bg-white/8 hover:text-white/80 transition-all duration-200 ${isCollapsed ? 'justify-center' : ''}`}
+                    title="Sign Out"
+                >
+                    <LogOut className="h-[18px] w-[18px] flex-shrink-0" />
+                    {!isCollapsed && <span>Sign Out</span>}
+                </button>
+            </div>
+        </>
+    );
 
     return (
         <>
             {/* Mobile toggle */}
             <button
-                onClick={() => setCollapsed(!collapsed)}
-                className="fixed top-4 left-4 z-50 rounded-lg bg-sidebar-bg p-2 text-white md:hidden"
+                onClick={() => setMobileOpen(true)}
+                className="fixed top-3.5 left-4 z-50 rounded-xl bg-sidebar-bg p-2 text-white shadow-lg md:hidden"
             >
                 <Menu className="h-5 w-5" />
             </button>
 
+            {/* Mobile overlay */}
+            {mobileOpen && (
+                <div className="fixed inset-0 z-40 md:hidden">
+                    <div className="absolute inset-0 bg-black/50" onClick={() => setMobileOpen(false)} />
+                    <aside className="absolute inset-y-0 left-0 w-64 flex flex-col bg-sidebar-bg text-white animate-slideInLeft z-50">
+                        <button
+                            onClick={() => setMobileOpen(false)}
+                            className="absolute top-4 right-4 rounded-lg p-1 text-white/50 hover:text-white"
+                        >
+                            <X className="h-5 w-5" />
+                        </button>
+                        {sidebarContent(false)}
+                    </aside>
+                </div>
+            )}
+
+            {/* Desktop sidebar */}
             <aside
-                className={`fixed inset-y-0 left-0 z-40 flex flex-col bg-sidebar-bg text-white transition-all duration-300 ${collapsed ? '-translate-x-full md:translate-x-0 md:w-16' : 'w-64'
+                className={`hidden md:flex fixed inset-y-0 left-0 z-40 flex-col bg-sidebar-bg text-white transition-all duration-300 ease-in-out ${collapsed ? 'w-[68px]' : 'w-64'
                     }`}
             >
-                {/* Logo */}
-                <div className="flex items-center justify-between px-4 py-5 border-b border-white/10">
-                    {!collapsed && (
-                        <Link href="/dashboard" className="flex items-center gap-2">
-                            <Wine className="h-6 w-6 text-primary-light" />
-                            <span className="font-serif text-lg font-bold">KSP Admin</span>
-                        </Link>
-                    )}
-                    <button
-                        onClick={() => setCollapsed(!collapsed)}
-                        className="hidden md:block p-1 rounded hover:bg-sidebar-hover transition-colors"
-                    >
-                        <ChevronLeft className={`h-4 w-4 transition-transform ${collapsed ? 'rotate-180' : ''}`} />
-                    </button>
-                </div>
+                {sidebarContent(collapsed)}
 
-                {/* Nav */}
-                <nav className="flex-1 px-3 py-4 space-y-1">
-                    {navItems.map(item => {
-                        const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
-                        return (
-                            <Link
-                                key={item.href}
-                                href={item.href}
-                                className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${isActive
-                                        ? 'bg-sidebar-active text-white'
-                                        : 'text-white/60 hover:bg-sidebar-hover hover:text-white'
-                                    } ${collapsed ? 'justify-center' : ''}`}
-                                title={collapsed ? item.label : undefined}
-                            >
-                                <item.icon className="h-5 w-5 flex-shrink-0" />
-                                {!collapsed && <span>{item.label}</span>}
-                            </Link>
-                        );
-                    })}
-                </nav>
-
-                {/* Footer */}
-                <div className="border-t border-white/10 px-3 py-4">
-                    {!collapsed && user && (
-                        <div className="mb-3 px-3">
-                            <p className="text-sm font-medium text-white/80 truncate">{user.name}</p>
-                            <p className="text-xs text-white/40 truncate">{user.email}</p>
-                        </div>
-                    )}
-                    <button
-                        onClick={logout}
-                        className={`flex items-center gap-3 w-full rounded-lg px-3 py-2.5 text-sm font-medium text-white/60 hover:bg-sidebar-hover hover:text-white transition-colors ${collapsed ? 'justify-center' : ''
-                            }`}
-                        title="Sign Out"
-                    >
-                        <LogOut className="h-5 w-5 flex-shrink-0" />
-                        {!collapsed && <span>Sign Out</span>}
-                    </button>
-                </div>
+                {/* Collapse toggle */}
+                <button
+                    onClick={onToggle}
+                    className="absolute -right-3 top-7 hidden md:flex h-6 w-6 items-center justify-center rounded-full border border-border bg-card-bg text-text-secondary shadow-sm hover:bg-page-bg transition-colors"
+                >
+                    <ChevronLeft className={`h-3 w-3 transition-transform duration-300 ${collapsed ? 'rotate-180' : ''}`} />
+                </button>
             </aside>
         </>
     );
