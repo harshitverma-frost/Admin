@@ -22,7 +22,7 @@ export default function DashboardHeader({
             {/* Decorative elements */}
             <div className="absolute top-0 right-0 w-64 h-64 rounded-full bg-white/5 -translate-y-1/2 translate-x-1/3" />
             <div className="absolute bottom-0 left-1/2 w-48 h-48 rounded-full bg-white/5 translate-y-1/2" />
-            <div className="absolute top-6 right-10 w-20 h-20 rounded-full bg-white/[0.03]" />
+            <div className="absolute top-7 right-10 w-20 h-20 rounded-full bg-white/[0.03]" />
 
             <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div className="max-w-lg">
