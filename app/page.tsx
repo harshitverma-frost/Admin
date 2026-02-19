@@ -3,7 +3,9 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAdminAuth } from '@/context/AdminAuthContext';
-import { Wine } from 'lucide-react';
+import { reactivateAccount } from '@/lib/api';
+import { Wine, RefreshCw } from 'lucide-react';
+import ConfirmModal from '@/components/ConfirmModal';
 import toast from 'react-hot-toast';
 
 export default function AdminLoginPage() {
@@ -12,6 +14,12 @@ export default function AdminLoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // Reactivation modal state
+  const [showReactivateModal, setShowReactivateModal] = useState(false);
+  const [reactivating, setReactivating] = useState(false);
+  const [deactivatedEmail, setDeactivatedEmail] = useState('');
+  const [deactivatedPassword, setDeactivatedPassword] = useState('');
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -32,9 +40,41 @@ export default function AdminLoginPage() {
     if (result.success) {
       toast.success('Welcome to admin panel!');
       router.push('/dashboard');
+    } else if (result.deactivated) {
+      // Account is deactivated → show reactivation modal
+      setDeactivatedEmail(email);
+      setDeactivatedPassword(password);
+      setShowReactivateModal(true);
     } else {
       toast.error(result.error || 'Login failed');
     }
+  };
+
+  const handleReactivate = async () => {
+    setReactivating(true);
+    const result = await reactivateAccount(deactivatedEmail, deactivatedPassword);
+    setReactivating(false);
+
+    if (result.success) {
+      setShowReactivateModal(false);
+      // Log the user in with the returned tokens
+      const loginResult = await login(deactivatedEmail, deactivatedPassword);
+      if (loginResult.success) {
+        toast.success('Welcome back! Your account has been reactivated.');
+        router.push('/dashboard');
+      } else {
+        toast.success('Account reactivated! Please sign in again.');
+      }
+    } else {
+      toast.error(result.error || 'Failed to reactivate account');
+    }
+  };
+
+  const handleCancelReactivation = () => {
+    setShowReactivateModal(false);
+    setDeactivatedEmail('');
+    setDeactivatedPassword('');
+    toast('Your account remains deactivated.', { icon: '🔒' });
   };
 
   return (
@@ -91,6 +131,38 @@ export default function AdminLoginPage() {
           <div className="w-full h-[1px] bg-gradient-to-r from-transparent via-gold/15 to-transparent mt-6" />
         </form>
       </div>
+
+      {/* ── Reactivation Modal ─────────────────────────────────────── */}
+      <ConfirmModal
+        open={showReactivateModal}
+        onClose={handleCancelReactivation}
+        title="Reactivate Your Account"
+        confirmLabel="Yes, Reactivate"
+        cancelLabel="Cancel"
+        onConfirm={handleReactivate}
+        confirmVariant="primary"
+        loading={reactivating}
+      >
+        <div className="space-y-4">
+          {/* Icon + Message */}
+          <div className="flex flex-col items-center text-center gap-3">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/20 to-primary/10 border border-gold/15">
+              <RefreshCw className="h-7 w-7 text-gold" />
+            </div>
+            <p className="text-sm text-text-secondary leading-relaxed">
+              Your account is currently deactivated.
+              <br />
+              Would you like to reactivate it and regain access?
+            </p>
+          </div>
+
+          {/* Email hint */}
+          <div className="rounded-lg bg-hover/50 border border-border px-3 py-2.5">
+            <p className="text-xs text-text-secondary">Account</p>
+            <p className="text-sm font-medium text-text-primary mt-0.5">{deactivatedEmail}</p>
+          </div>
+        </div>
+      </ConfirmModal>
     </div>
   );
 }

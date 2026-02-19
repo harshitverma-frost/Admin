@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { createProduct, uploadProductImage } from '@/lib/api';
+import { createProduct, updateStock, uploadProductImage } from '@/lib/api';
 import { ArrowLeft, Save, Upload, X, ImageIcon } from 'lucide-react';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
@@ -31,6 +31,7 @@ export default function AddProductPage() {
         intended_use: '',
         price: '',
         quantity: '',
+        country_of_origin: '',
     });
 
     const update = (field: string, value: string) => setForm(prev => ({ ...prev, [field]: value }));
@@ -100,12 +101,22 @@ export default function AddProductPage() {
             intended_use: form.intended_use || undefined,
             price: form.price ? parseFloat(form.price) : undefined,
             quantity: form.quantity ? parseInt(form.quantity) : undefined,
+            country_of_origin: form.country_of_origin || undefined,
         });
 
         if (!result.success) {
             setLoading(false);
             toast.error(result.error || 'Failed to create product');
             return;
+        }
+
+        // Set initial stock quantity if provided
+        const initialQty = form.quantity ? parseInt(form.quantity) : 0;
+        if (initialQty > 0 && result.product?.product_id) {
+            const stockOk = await updateStock(result.product.product_id, initialQty);
+            if (!stockOk) {
+                toast.error('Product created but failed to set initial stock');
+            }
         }
 
         // Upload images if any were selected
@@ -137,6 +148,10 @@ export default function AddProductPage() {
     };
 
     const categories = ['Red Wine', 'White Wine', 'Rosé', 'Sparkling', 'Dessert Wine', 'Fortified'];
+    const countries = [
+        'France', 'Italy', 'Spain', 'USA', 'Australia',
+        'Argentina', 'Chile', 'Germany', 'Portugal', 'India', 'South Africa'
+    ];
 
     return (
         <div>
@@ -220,6 +235,20 @@ export default function AddProductPage() {
                                     className="w-full rounded-lg border border-border px-4 py-2.5 text-sm focus:border-primary focus:outline-none"
                                     placeholder="750ml"
                                 />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-text-primary mb-1">Country of Origin *</label>
+                                <select
+                                    value={form.country_of_origin}
+                                    onChange={e => update('country_of_origin', e.target.value)}
+                                    className="w-full rounded-lg border border-border px-4 py-2.5 text-sm focus:border-gold/40 focus:outline-none"
+                                    required
+                                >
+                                    <option value="">Select country</option>
+                                    {countries.map(c => (
+                                        <option key={c} value={c}>{c}</option>
+                                    ))}
+                                </select>
                             </div>
                         </div>
                     </div>

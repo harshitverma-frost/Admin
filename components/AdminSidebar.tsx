@@ -24,7 +24,7 @@ const secondaryNav = [
 
 const bottomNav = [
     { href: '#', label: 'Analytics', icon: BarChart3 },
-    { href: '#', label: 'Settings', icon: Settings },
+    { href: '/dashboard/settings', label: 'Settings', icon: Settings },
 ];
 
 interface AdminSidebarProps {

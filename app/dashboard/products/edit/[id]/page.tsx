@@ -51,6 +51,7 @@ export default function EditProductPage({ params }: Props) {
         unit_of_measure: '',
         intended_use: '',
         price: '',
+        country_of_origin: '',
     });
 
     useEffect(() => {
@@ -69,6 +70,7 @@ export default function EditProductPage({ params }: Props) {
                     unit_of_measure: product.unit_of_measure || '',
                     intended_use: product.intended_use || '',
                     price: product.price != null ? String(product.price) : '',
+                    country_of_origin: product.country_of_origin || '',
                 });
                 setStockValue(product.quantity ?? 0);
             }
@@ -193,6 +195,10 @@ export default function EditProductPage({ params }: Props) {
     };
 
     const categories = ['Red Wine', 'White Wine', 'Rosé', 'Sparkling', 'Dessert Wine', 'Fortified'];
+    const countries = [
+        'France', 'Italy', 'Spain', 'USA', 'Australia',
+        'Argentina', 'Chile', 'Germany', 'Portugal', 'India', 'South Africa'
+    ];
 
     if (loading) {
         return (
@@ -250,6 +256,14 @@ export default function EditProductPage({ params }: Props) {
                             <label className="block text-sm font-medium text-text-primary mb-1">Unit of Measure</label>
                             <input type="text" value={form.unit_of_measure} onChange={e => update('unit_of_measure', e.target.value)}
                                 className="w-full rounded-lg border border-border px-4 py-2.5 text-sm focus:border-primary focus:outline-none" />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-text-primary mb-1">Country of Origin</label>
+                            <select value={form.country_of_origin} onChange={e => update('country_of_origin', e.target.value)}
+                                className="w-full rounded-lg border border-border px-4 py-2.5 text-sm focus:border-gold/40 focus:outline-none">
+                                <option value="">Select country</option>
+                                {countries.map(c => <option key={c} value={c}>{c}</option>)}
+                            </select>
                         </div>
                     </div>
 
