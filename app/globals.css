@@ -2,48 +2,44 @@
 
 /* ═══════════════════════════════════════════════════
    KSP Wines Admin — Dual Theme System
-   ☀ Light: "Vintage Estate"  (default in @theme)
-   🌙 Dark: "Wine Cellar"     (.dark overrides)
+   Light: "Vintage Estate"  •  Dark: "Wine Cellar"
    ═══════════════════════════════════════════════════ */
 
-/* ─── Tailwind Theme Tokens ───
-   Light mode values are the defaults.
-   .dark block below overrides them at runtime. */
+/* ─── Tailwind theme tokens (static, shared) ─── */
 
 @theme inline {
-  /* Primary — Muted Burgundy */
-  --color-primary: #6A1F28;
-  --color-primary-dark: #5C1A22;
-  --color-primary-light: #7A2832;
-  --color-plum: #5A3D4A;
+  /* Primary — Muted Burgundy family */
+  --color-primary: var(--t-primary);
+  --color-primary-dark: var(--t-primary-dark);
+  --color-primary-light: var(--t-primary-light);
 
-  /* Surfaces — Light (Vintage Estate) */
-  --color-sidebar-bg: #ECE3D8;
-  --color-sidebar-hover: #E0D4C6;
-  --color-sidebar-active: #6A1F28;
-  --color-card-bg: #FFFFFF;
-  --color-card-bg-elevated: #FDFAF6;
-  --color-page-bg: #F6F1EA;
-  --color-border: #D9CFC4;
-  --color-border-subtle: #E8DFD4;
+  /* Plum accent */
+  --color-plum: var(--t-plum);
+
+  /* Surfaces */
+  --color-sidebar-bg: var(--t-sidebar-bg);
+  --color-sidebar-hover: var(--t-sidebar-hover);
+  --color-sidebar-active: var(--t-sidebar-active);
+  --color-card-bg: var(--t-card-bg);
+  --color-card-bg-elevated: var(--t-card-bg-elevated);
+  --color-page-bg: var(--t-page-bg);
+  --color-border: var(--t-border);
+  --color-border-subtle: var(--t-border-subtle);
 
   /* Text */
-  --color-text-primary: #2C1B16;
-  --color-text-secondary: #5A4A42;
-  --color-text-muted: #8C7B72;
+  --color-text-primary: var(--t-text-primary);
+  --color-text-secondary: var(--t-text-secondary);
+  --color-text-muted: var(--t-text-muted);
 
   /* Gold accent */
-  --color-gold: #B08D57;
-  --color-gold-muted: #9A7B4F;
-  --color-gold-soft: #6A1F28;
-
-  /* Champagne — always light, for text on dark surfaces */
-  --color-champagne: #E8D8B9;
+  --color-gold: var(--t-gold);
+  --color-gold-muted: var(--t-gold-muted);
+  --color-gold-soft: var(--t-gold-soft);
 
   /* Status — muted, no neons */
   --color-success: #6F7F5F;
   --color-warning: #9A7B4F;
-  --color-danger: #6A1F28;
+  --color-danger: var(--t-danger);
   --color-info: #4A5A6A;
 
   /* Typography */
@@ -51,45 +47,104 @@
   --font-sans: 'Inter', system-ui, sans-serif;
 }
 
-/* ─── 🌙 Dark Mode Overrides ─── */
+/* ─────────────────────────────────────────────────
+   ☀  LIGHT MODE — "Vintage Estate"  (default)
+   ───────────────────────────────────────────────── */
+
+:root {
+  --t-primary: #6A1F28;
+  --t-primary-dark: #5C1A22;
+  --t-primary-light: #7A2832;
+
+  --t-plum: #5A3D4A;
+
+  --t-sidebar-bg: #ECE3D8;
+  --t-sidebar-hover: #E0D4C6;
+  --t-sidebar-active: #6A1F28;
+
+  --t-card-bg: #FFFFFF;
+  --t-card-bg-elevated: #FFFFFF;
+  --t-page-bg: #F6F1EA;
+  --t-border: #D9CFC4;
+  --t-border-subtle: #E8DFD4;
+
+  --t-text-primary: #2C1B16;
+  --t-text-secondary: #5A4A42;
+  --t-text-muted: #8C7B72;
+
+  --t-gold: #B08D57;
+  --t-gold-muted: #9A7B4F;
+  --t-gold-soft: #6A1F28;
+
+  --t-danger: #6A1F28;
+
+  --background: #F6F1EA;
+  --foreground: #2C1B16;
+
+  /* Light-mode specific surface colors for non-Tailwind usage */
+  --surface-input: #FFFFFF;
+  --surface-scrollbar-track: #EDE6DC;
+  --surface-scrollbar-thumb: #C5B6A5;
+  --surface-scrollbar-thumb-hover: #B08D57;
+  --surface-shimmer-a: #EDE6DC;
+  --surface-shimmer-b: #E0D4C6;
+  --surface-selection-bg: rgba(106, 31, 40, 0.2);
+  --surface-selection-color: #2C1B16;
+  --surface-stock-bg: #FFFFFF;
+  --surface-spinner-bg: rgba(255, 255, 255, 0.85);
+  --surface-grain-opacity: 0.015;
+  --surface-shadow-hover: rgba(106, 31, 40, 0.08);
+}
+
+/* ─────────────────────────────────────────────────
+   🌙  DARK MODE — "Wine Cellar"
+   ───────────────────────────────────────────────── */
 
 .dark {
-  --color-primary: #4B0F1A;
-  --color-primary-dark: #3A0E12;
-  --color-primary-light: #5C1A1B;
-  --color-plum: #3B1E2B;
+  --t-primary: #4B0F1A;
+  --t-primary-dark: #3A0E12;
+  --t-primary-light: #5C1A1B;
 
-  --color-sidebar-bg: #1A1A1A;
-  --color-sidebar-hover: #2B1E1A;
-  --color-sidebar-active: #4B0F1A;
-  --color-card-bg: #1E1A1A;
-  --color-card-bg-elevated: #252020;
-  --color-page-bg: #141111;
-  --color-border: #3A2E2E;
-  --color-border-subtle: #2C2424;
+  --t-plum: #3B1E2B;
 
-  --color-text-primary: #E8D8B9;
-  --color-text-secondary: #A89880;
-  --color-text-muted: #6B5E52;
+  --t-sidebar-bg: #1A1A1A;
+  --t-sidebar-hover: #2B1E1A;
+  --t-sidebar-active: #4B0F1A;
 
-  --color-gold: #C5A46D;
-  --color-gold-muted: #B08D57;
-  --color-gold-soft: #E8D8B9;
+  --t-card-bg: #1E1A1A;
+  --t-card-bg-elevated: #252020;
+  --t-page-bg: #141111;
+  --t-border: #3A2E2E;
+  --t-border-subtle: #2C2424;
 
-  --color-danger: #7A2E35;
+  --t-text-primary: #E8D8B9;
+  --t-text-secondary: #A89880;
+  --t-text-muted: #6B5E52;
+
+  --t-gold: #C5A46D;
+  --t-gold-muted: #B08D57;
+  --t-gold-soft: #E8D8B9;
+
+  --t-danger: #7A2E35;
+
+  --background: #141111;
+  --foreground: #E8D8B9;
+
+  --surface-input: #1A1616;
+  --surface-scrollbar-track: #1A1616;
+  --surface-scrollbar-thumb: #4B0F1A;
+  --surface-scrollbar-thumb-hover: #C5A46D;
+  --surface-shimmer-a: #252020;
+  --surface-shimmer-b: #2C2424;
+  --surface-selection-bg: rgba(75, 15, 26, 0.5);
+  --surface-selection-color: #E8D8B9;
+  --surface-stock-bg: #1A1616;
+  --surface-spinner-bg: rgba(26, 22, 22, 0.85);
+  --surface-grain-opacity: 0.03;
+  --surface-shadow-hover: rgba(0, 0, 0, 0.3);
 }
 
 /* ─── Base ─── */
-
-:root {
-  --background: #F6F1EA;
-  --foreground: #2C1B16;
-}
-
-.dark {
-  --background: #141111;
-  --foreground: #E8D8B9;
-}
 
 body {
   background: var(--background);
@@ -105,40 +160,23 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #EDE6DC;
-}
-
-.dark ::-webkit-scrollbar-track {
-  background: #1A1616;
+  background: var(--surface-scrollbar-track);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #C5B6A5;
+  background: var(--surface-scrollbar-thumb);
   border-radius: 3px;
 }
 
-.dark ::-webkit-scrollbar-thumb {
-  background: #4B0F1A;
-}
-
 ::-webkit-scrollbar-thumb:hover {
-  background: #B08D57;
-}
-
-.dark ::-webkit-scrollbar-thumb:hover {
-  background: #C5A46D;
+  background: var(--surface-scrollbar-thumb-hover);
 }
 
 /* ─── Selection ─── */
 
 ::selection {
-  background: rgba(106, 31, 40, 0.2);
-  color: #2C1B16;
-}
-
-.dark ::selection {
-  background: rgba(75, 15, 26, 0.5);
-  color: #E8D8B9;
+  background: var(--surface-selection-bg);
+  color: var(--surface-selection-color);
 }
 
 /* ─── Form elements ─── */
@@ -147,33 +185,17 @@ input,
 textarea,
 select {
   color: var(--foreground) !important;
-  background-color: #FFFFFF !important;
-}
-
-.dark input,
-.dark textarea,
-.dark select {
-  background-color: #1A1616 !important;
+  background-color: var(--surface-input) !important;
 }
 
 input::placeholder,
 textarea::placeholder {
-  color: #8C7B72 !important;
-}
-
-.dark input::placeholder,
-.dark textarea::placeholder {
-  color: #6B5E52 !important;
+  color: var(--t-text-muted) !important;
 }
 
 select option {
-  background: #FFFFFF;
-  color: #2C1B16;
-}
-
-.dark select option {
-  background: #1E1A1A;
-  color: #E8D8B9;
+  background: var(--t-card-bg);
+  color: var(--foreground);
 }
 
 /* ─── Animations ─── */
@@ -189,14 +211,9 @@ select option {
 }
 
 .animate-shimmer {
-  background: linear-gradient(90deg, #EDE6DC 25%, #E0D4C6 50%, #EDE6DC 75%);
+  background: linear-gradient(90deg, var(--surface-shimmer-a) 25%, var(--surface-shimmer-b) 50%, var(--surface-shimmer-a) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s ease-in-out infinite;
-}
-
-.dark .animate-shimmer {
-  background: linear-gradient(90deg, #252020 25%, #2C2424 50%, #252020 75%);
-  background-size: 200% 100%;
 }
 
 @keyframes fadeInUp {
@@ -276,19 +293,15 @@ select option {
 .stock-control {
   display: inline-flex;
   align-items: center;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--t-border);
   border-radius: 0.5rem;
   overflow: hidden;
-  background: #FFFFFF;
+  background: var(--surface-stock-bg);
   transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-.dark .stock-control {
-  background: #1A1616;
-}
-
 .stock-control:focus-within {
-  border-color: var(--color-gold);
+  border-color: var(--t-gold);
   box-shadow: 0 0 0 2px rgba(176, 141, 87, 0.15);
 }
 
@@ -306,7 +319,7 @@ select option {
   justify-content: center;
   border: none;
   background: transparent;
-  color: var(--color-text-secondary);
+  color: var(--t-text-secondary);
   cursor: pointer;
   transition: all 0.3s ease;
   flex-shrink: 0;
@@ -324,7 +337,7 @@ select option {
 
 .stock-control__btn:hover:not(:disabled) {
   background: rgba(176, 141, 87, 0.1);
-  color: var(--color-gold);
+  color: var(--t-gold);
 }
 
 .stock-control__btn:active:not(:disabled) {
@@ -337,11 +350,11 @@ select option {
 }
 
 .stock-control__btn--dec {
-  border-right: 1px solid var(--color-border);
+  border-right: 1px solid var(--t-border);
 }
 
 .stock-control__btn--inc {
-  border-left: 1px solid var(--color-border);
+  border-left: 1px solid var(--t-border);
 }
 
 .stock-control__input-wrap {
@@ -356,7 +369,7 @@ select option {
   outline: none;
   background: transparent !important;
   font-weight: 600;
-  color: var(--color-gold) !important;
+  color: var(--t-gold) !important;
   font-variant-numeric: tabular-nums;
 }
 
@@ -382,12 +395,8 @@ select option {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.85);
+  background: var(--surface-spinner-bg);
   border-radius: 0.25rem;
-}
-
-.dark .stock-control__spinner {
-  background: rgba(26, 22, 22, 0.85);
 }
 
 /* ─── Low stock badge ─── */
@@ -417,13 +426,9 @@ body::before {
   position: fixed;
   inset: 0;
   z-index: -1;
-  opacity: 0.015;
+  opacity: var(--surface-grain-opacity);
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
   pointer-events: none;
-}
-
-.dark body::before {
-  opacity: 0.03;
 }
 
 /* ─── Luxury micro-interactions ─── */
@@ -434,11 +439,7 @@ body::before {
 
 .hover-lift:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(106, 31, 40, 0.08);
-}
-
-.dark .hover-lift:hover {
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 8px 24px var(--surface-shadow-hover);
 }
 
 /* Gold glow on hover */
@@ -455,19 +456,9 @@ body::before {
   height: 1px;
   background: linear-gradient(90deg,
       transparent 0%,
-      var(--color-border) 20%,
-      var(--color-gold-muted) 50%,
-      var(--color-border) 80%,
+      var(--t-border) 20%,
+      var(--t-gold-muted) 50%,
+      var(--t-border) 80%,
       transparent 100%);
   margin: 1.5rem 0;
-}
-
-/* ─── Light-mode card shadow ─── */
-
-.shadow-card {
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.03);
-}
-
-.dark .shadow-card {
-  box-shadow: none;
 }
