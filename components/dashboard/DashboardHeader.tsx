@@ -18,19 +18,21 @@ export default function DashboardHeader({
     icon: Icon,
 }: DashboardHeaderProps) {
     return (
-        <div className="relative overflow-hidden rounded-2xl p-6 sm:p-8 border border-[#C5A46D]/15"
+        <div
+            className="relative overflow-hidden rounded-2xl p-6 sm:p-8 border border-[#C5A46D]/15"
             style={{
                 background: 'linear-gradient(to bottom right, #3A0E12, #4B0F1A, #3B1E2B)',
             }}
         >
-            {/* Decorative — radial vignette */}
+            {/* Radial vignette overlay */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent pointer-events-none" />
+
             {/* Decorative orbs */}
             <div className="absolute top-0 right-0 w-64 h-64 rounded-full bg-[#C5A46D]/[0.04] -translate-y-1/2 translate-x-1/3" />
             <div className="absolute bottom-0 left-1/2 w-48 h-48 rounded-full bg-[#C5A46D]/[0.03] translate-y-1/2" />
             <div className="absolute top-6 right-10 w-20 h-20 rounded-full bg-[#C5A46D]/[0.02]" />
 
-            {/* Wine label ornament line */}
+            {/* Ornament line */}
             <div className="absolute top-0 left-1/4 right-1/4 h-[1px] bg-gradient-to-r from-transparent via-[#C5A46D]/30 to-transparent" />
 
             <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -41,13 +43,16 @@ export default function DashboardHeader({
                             Dashboard
                         </span>
                     </div>
+
                     <h2 className="font-serif text-xl sm:text-2xl font-bold leading-tight text-[#E8D8B9]">
                         {title}
                     </h2>
+
                     <p className="mt-2 text-sm text-[#A89880] leading-relaxed">
                         {subtitle}
                     </p>
                 </div>
+
                 {buttonLabel && (
                     <button
                         onClick={onButtonClick}
