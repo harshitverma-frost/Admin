@@ -58,13 +58,17 @@ export default function AdminSidebar({ collapsed, onToggle }: AdminSidebarProps)
             <Link
                 key={item.label}
                 href={item.href}
-                className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 ${isActive
-                        ? 'bg-white/15 text-white shadow-sm'
-                        : 'text-white/50 hover:bg-white/8 hover:text-white/80'
+                className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-300 relative ${isActive
+                    ? 'text-gold bg-gold/[0.08]'
+                    : 'text-text-muted hover:text-gold-soft hover:bg-gold/[0.04]'
                     } ${isCollapsed ? 'justify-center' : ''}`}
                 title={isCollapsed ? item.label : undefined}
             >
-                <Icon className="h-[18px] w-[18px] flex-shrink-0" />
+                {/* Gold left border indicator for active state */}
+                {isActive && !isCollapsed && (
+                    <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-gold rounded-r-full" />
+                )}
+                <Icon className={`h-[18px] w-[18px] flex-shrink-0 ${isActive ? 'text-gold' : ''}`} />
                 {!isCollapsed && <span>{item.label}</span>}
             </Link>
         );
@@ -73,18 +77,21 @@ export default function AdminSidebar({ collapsed, onToggle }: AdminSidebarProps)
     const sidebarContent = (isCollapsed: boolean) => (
         <>
             {/* Logo */}
-            <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'} px-4 py-5 border-b border-white/8`}>
+            <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'} px-4 py-5 border-b border-border-subtle`}>
                 {!isCollapsed && (
                     <Link href="/dashboard" className="flex items-center gap-2.5">
-                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary-light">
-                            <Wine className="h-4 w-4 text-white" />
+                        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary-light shadow-lg shadow-primary/30">
+                            <Wine className="h-4.5 w-4.5 text-[#E8D8B9]" />
                         </div>
-                        <span className="font-serif text-lg font-bold text-white">KSP Admin</span>
+                        <div>
+                            <span className="font-serif text-lg font-bold text-[#E8D8B9] tracking-wide">KSP</span>
+                            <span className="block text-[9px] uppercase tracking-[0.3em] text-text-muted font-medium -mt-0.5">Wines Admin</span>
+                        </div>
                     </Link>
                 )}
                 {isCollapsed && (
-                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary-light">
-                        <Wine className="h-4 w-4 text-white" />
+                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary-light shadow-lg shadow-primary/30">
+                        <Wine className="h-4.5 w-4.5 text-[#E8D8B9]" />
                     </div>
                 )}
             </div>
@@ -92,25 +99,25 @@ export default function AdminSidebar({ collapsed, onToggle }: AdminSidebarProps)
             {/* Main nav */}
             <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
                 {!isCollapsed && (
-                    <p className="px-3 mb-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/30">
+                    <p className="px-3 mb-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-gold-muted/40">
                         Main
                     </p>
                 )}
                 {mainNav.map(item => renderNavItem(item, isCollapsed))}
 
-                <div className="my-3 border-t border-white/8" />
+                <div className="my-3 border-t border-border-subtle" />
 
                 {!isCollapsed && (
-                    <p className="px-3 mb-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/30">
+                    <p className="px-3 mb-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-gold-muted/40">
                         Management
                     </p>
                 )}
                 {secondaryNav.map(item => renderNavItem(item, isCollapsed))}
 
-                <div className="my-3 border-t border-white/8" />
+                <div className="my-3 border-t border-white/[0.05]" />
 
                 {!isCollapsed && (
-                    <p className="px-3 mb-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/30">
+                    <p className="px-3 mb-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-gold-muted/40">
                         System
                     </p>
                 )}
@@ -118,16 +125,16 @@ export default function AdminSidebar({ collapsed, onToggle }: AdminSidebarProps)
             </nav>
 
             {/* Footer */}
-            <div className="border-t border-white/8 px-3 py-4">
+            <div className="border-t border-border-subtle px-3 py-4">
                 {!isCollapsed && user && (
                     <div className="mb-3 px-3">
-                        <p className="text-sm font-medium text-white/80 truncate">{user.name}</p>
-                        <p className="text-[11px] text-white/35 truncate">{user.email}</p>
+                        <p className="text-sm font-medium text-gold-soft/80 truncate">{user.name}</p>
+                        <p className="text-[11px] text-text-muted/60 truncate">{user.email}</p>
                     </div>
                 )}
                 <button
                     onClick={logout}
-                    className={`flex items-center gap-3 w-full rounded-xl px-3 py-2.5 text-sm font-medium text-white/50 hover:bg-white/8 hover:text-white/80 transition-all duration-200 ${isCollapsed ? 'justify-center' : ''}`}
+                    className={`flex items-center gap-3 w-full rounded-xl px-3 py-2.5 text-sm font-medium text-text-muted hover:text-danger hover:bg-danger/[0.08] transition-all duration-300 ${isCollapsed ? 'justify-center' : ''}`}
                     title="Sign Out"
                 >
                     <LogOut className="h-[18px] w-[18px] flex-shrink-0" />
@@ -142,7 +149,7 @@ export default function AdminSidebar({ collapsed, onToggle }: AdminSidebarProps)
             {/* Mobile toggle */}
             <button
                 onClick={() => setMobileOpen(true)}
-                className="fixed top-3.5 left-4 z-50 rounded-xl bg-sidebar-bg p-2 text-white shadow-lg md:hidden"
+                className="fixed top-3.5 left-4 z-50 rounded-xl bg-sidebar-bg p-2 text-gold-soft shadow-lg md:hidden border border-border-subtle"
             >
                 <Menu className="h-5 w-5" />
             </button>
@@ -150,11 +157,11 @@ export default function AdminSidebar({ collapsed, onToggle }: AdminSidebarProps)
             {/* Mobile overlay */}
             {mobileOpen && (
                 <div className="fixed inset-0 z-40 md:hidden">
-                    <div className="absolute inset-0 bg-black/50" onClick={() => setMobileOpen(false)} />
-                    <aside className="absolute inset-y-0 left-0 w-64 flex flex-col bg-sidebar-bg text-white animate-slideInLeft z-50">
+                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setMobileOpen(false)} />
+                    <aside className="absolute inset-y-0 left-0 w-64 flex flex-col bg-sidebar-bg animate-slideInLeft z-50 border-r border-border-subtle">
                         <button
                             onClick={() => setMobileOpen(false)}
-                            className="absolute top-4 right-4 rounded-lg p-1 text-white/50 hover:text-white"
+                            className="absolute top-4 right-4 rounded-lg p-1 text-text-muted hover:text-gold-soft"
                         >
                             <X className="h-5 w-5" />
                         </button>
@@ -165,7 +172,7 @@ export default function AdminSidebar({ collapsed, onToggle }: AdminSidebarProps)
 
             {/* Desktop sidebar */}
             <aside
-                className={`hidden md:flex fixed inset-y-0 left-0 z-40 flex-col bg-sidebar-bg text-white transition-all duration-300 ease-in-out ${collapsed ? 'w-[68px]' : 'w-64'
+                className={`hidden md:flex fixed inset-y-0 left-0 z-40 flex-col bg-sidebar-bg transition-all duration-300 ease-in-out border-r border-border-subtle ${collapsed ? 'w-[68px]' : 'w-64'
                     }`}
             >
                 {sidebarContent(collapsed)}
@@ -173,7 +180,7 @@ export default function AdminSidebar({ collapsed, onToggle }: AdminSidebarProps)
                 {/* Collapse toggle */}
                 <button
                     onClick={onToggle}
-                    className="absolute -right-3 top-7 hidden md:flex h-6 w-6 items-center justify-center rounded-full border border-border bg-card-bg text-text-secondary shadow-sm hover:bg-page-bg transition-colors"
+                    className="absolute -right-3 top-7 hidden md:flex h-6 w-6 items-center justify-center rounded-full border border-border bg-card-bg text-text-muted shadow-sm hover:text-gold hover:border-gold/30 transition-all duration-300"
                 >
                     <ChevronLeft className={`h-3 w-3 transition-transform duration-300 ${collapsed ? 'rotate-180' : ''}`} />
                 </button>
