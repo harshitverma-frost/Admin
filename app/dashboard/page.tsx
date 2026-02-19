@@ -1,7 +1,9 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { getProducts, getOrders, getCategories, Product, Order, Category } from '@/lib/api';
+import { getProducts, getOrders, Product, Order } from '@/lib/api';
+import { getCategories } from '@/lib/api/category';
+import { Category } from '@/types/category';
 import Link from 'next/link';
 import {
     Package, ShoppingCart, Tag, TrendingUp, Plus, ArrowUpRight, Sparkles,

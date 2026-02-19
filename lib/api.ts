@@ -313,89 +313,10 @@ export async function getStockHistory(productId: string) {
     }
 }
 
-/* ─── Categories ─── */
-
-export interface Category {
-    category_id?: string;
-    id: string;
-    name: string;
-    slug?: string;
-    description: string;
-    product_count?: number;
-    parent_id?: string;
-    image_url?: string;
-}
-
-export async function getCategories(): Promise<Category[]> {
-    try {
-        const res = await fetch(`${API_URL}/api/categories`);
-        const json: ApiResponse<any[]> = await res.json();
-        if (json.success && json.data && json.data.length > 0) {
-            return json.data.map((cat: Record<string, unknown>) => ({
-                id: (cat.category_id ?? cat.id ?? '') as string,
-                category_id: (cat.category_id ?? '') as string,
-                name: (cat.name ?? '') as string,
-                slug: (cat.slug ?? '') as string,
-                description: (cat.description ?? '') as string,
-                product_count: (cat.product_count ?? 0) as number,
-                parent_id: (cat.parent_id ?? undefined) as string | undefined,
-                image_url: (cat.image_url ?? undefined) as string | undefined,
-            }));
-        }
-        return getMockCategories();
-    } catch {
-        return getMockCategories();
-    }
-}
-
-export function getMockCategories(): Category[] {
-    return [
-        { id: 'cat-1', name: 'Red Wine', description: 'Full-bodied red wines', product_count: 12 },
-        { id: 'cat-2', name: 'White Wine', description: 'Crisp and refreshing whites', product_count: 8 },
-        { id: 'cat-3', name: 'Rosé', description: 'Elegant rosé selections', product_count: 5 },
-        { id: 'cat-4', name: 'Sparkling', description: 'Celebratory bubbles', product_count: 4 },
-        { id: 'cat-5', name: 'Dessert Wine', description: 'Sweet and complex', product_count: 3 },
-        { id: 'cat-6', name: 'Fortified', description: 'Port and sherry styles', product_count: 2 },
-    ];
-}
-
-export async function createCategory(data: { name: string; slug: string; description?: string; parent_id?: string; image_url?: string }): Promise<{ success: boolean; error?: string }> {
-    try {
-        const res = await fetch(`${API_URL}/api/categories`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data),
-        });
-        const json: ApiResponse = await res.json();
-        return { success: json.success, error: json.message };
-    } catch {
-        return { success: false, error: 'Network error' };
-    }
-}
-
-export async function updateCategory(id: string, data: Partial<Category>): Promise<{ success: boolean; error?: string }> {
-    try {
-        const res = await fetch(`${API_URL}/api/categories/${id}`, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data),
-        });
-        const json: ApiResponse = await res.json();
-        return { success: json.success, error: json.message };
-    } catch {
-        return { success: false, error: 'Network error' };
-    }
-}
-
-export async function deleteCategory(id: string): Promise<boolean> {
-    try {
-        const res = await fetch(`${API_URL}/api/categories/${id}`, { method: 'DELETE' });
-        const json: ApiResponse = await res.json();
-        return json.success;
-    } catch {
-        return false;
-    }
-}
+/* ─── Categories ───
+ * Category CRUD has been moved to lib/api/category.ts
+ * Import from '@/lib/api/category' instead.
+ */
 
 /* ─── Product Images ─── */
 

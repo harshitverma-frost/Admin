@@ -3,6 +3,8 @@
 import { useState, useEffect, useRef, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { getProduct, updateProduct, uploadProductImage, getProductImages, deleteProductImage, setPrimaryImage } from '@/lib/api';
+import { getCategories } from '@/lib/api/category';
+import { Category } from '@/types/category';
 import { ArrowLeft, Save, Upload, X, Star, Trash2, ImageIcon, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
@@ -35,6 +37,7 @@ export default function EditProductPage({ params }: Props) {
     const [newImages, setNewImages] = useState<NewImagePreview[]>([]);
     const [uploadingImages, setUploadingImages] = useState(false);
     const [deletingImageId, setDeletingImageId] = useState<string | null>(null);
+    const [categories, setCategories] = useState<Category[]>([]);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [form, setForm] = useState({
         sku: '',
@@ -51,7 +54,8 @@ export default function EditProductPage({ params }: Props) {
         Promise.all([
             getProduct(id),
             getProductImages(id),
-        ]).then(([product, images]) => {
+            getCategories(),
+        ]).then(([product, images, cats]) => {
             if (product) {
                 setForm({
                     sku: product.sku || '',
@@ -67,6 +71,7 @@ export default function EditProductPage({ params }: Props) {
             if (Array.isArray(images)) {
                 setExistingImages(images as ExistingImage[]);
             }
+            setCategories(cats);
             setLoading(false);
         });
     }, [id]);
@@ -181,7 +186,19 @@ export default function EditProductPage({ params }: Props) {
         }
     };
 
-    const categories = ['Red Wine', 'White Wine', 'Rosé', 'Sparkling', 'Dessert Wine', 'Fortified'];
+    const parentCategories = categories.filter(c => !c.parent_id);
+    // Find the selected parent's category_id by matching the name stored in form.category
+    const selectedParent = categories.find(c => !c.parent_id && c.name === form.category);
+    // Only show subcategories that belong to the selected parent
+    const subCategories = selectedParent
+        ? categories.filter(c => c.parent_id === selectedParent.category_id)
+        : [];
+
+    // When parent category changes, clear the sub_category
+    const handleCategoryChange = (value: string) => {
+        update('category', value);
+        update('sub_category', '');
+    };
 
     if (loading) {
         return (
@@ -224,16 +241,30 @@ export default function EditProductPage({ params }: Props) {
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-text-primary mb-1">Category</label>
-                            <select value={form.category} onChange={e => update('category', e.target.value)}
+                            <select value={form.category} onChange={e => handleCategoryChange(e.target.value)}
                                 className="w-full rounded-lg border border-border px-4 py-2.5 text-sm focus:border-primary focus:outline-none bg-white">
                                 <option value="">Select</option>
-                                {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                                {parentCategories.map(cat => (
+                                    <option key={cat.category_id} value={cat.name}>{cat.name}</option>
+                                ))}
                             </select>
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-text-primary mb-1">Sub Category</label>
-                            <input type="text" value={form.sub_category} onChange={e => update('sub_category', e.target.value)}
-                                className="w-full rounded-lg border border-border px-4 py-2.5 text-sm focus:border-primary focus:outline-none" />
+                            <select value={form.sub_category} onChange={e => update('sub_category', e.target.value)}
+                                className="w-full rounded-lg border border-border px-4 py-2.5 text-sm focus:border-primary focus:outline-none bg-white"
+                                disabled={!form.category || subCategories.length === 0}>
+                                <option value="">
+                                    {!form.category
+                                        ? 'Select a category first'
+                                        : subCategories.length === 0
+                                            ? 'No subcategories available'
+                                            : 'Select sub category'}
+                                </option>
+                                {subCategories.map(cat => (
+                                    <option key={cat.category_id} value={cat.name}>{cat.name}</option>
+                                ))}
+                            </select>
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-text-primary mb-1">Unit of Measure</label>
