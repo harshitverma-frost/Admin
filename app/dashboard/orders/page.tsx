@@ -28,12 +28,12 @@ export default function OrdersPage() {
 
     const statusColor = (status: string) => {
         switch (status) {
-            case 'confirmed': return 'bg-green-100 text-green-700';
-            case 'shipped': return 'bg-blue-100 text-blue-700';
-            case 'delivered': return 'bg-purple-100 text-purple-700';
-            case 'pending': return 'bg-yellow-100 text-yellow-700';
-            case 'cancelled': return 'bg-red-100 text-red-700';
-            default: return 'bg-gray-100 text-gray-700';
+            case 'confirmed': return 'bg-success/15 text-success';
+            case 'shipped': return 'bg-info/15 text-info';
+            case 'delivered': return 'bg-gold/15 text-gold';
+            case 'pending': return 'bg-warning/15 text-warning';
+            case 'cancelled': return 'bg-danger/15 text-danger';
+            default: return 'bg-text-muted/15 text-text-muted';
         }
     };
 
@@ -41,13 +41,13 @@ export default function OrdersPage() {
         <div>
             <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
                 <div>
-                    <h1 className="font-serif text-2xl font-bold text-text-primary">Orders</h1>
+                    <h1 className="font-serif text-2xl font-bold text-gold-soft">Orders</h1>
                     <p className="text-sm text-text-secondary">{orders.length} total orders</p>
                 </div>
                 <select
                     value={filterStatus}
                     onChange={e => setFilterStatus(e.target.value)}
-                    className="rounded-lg border border-border bg-card-bg px-3 py-2 text-sm focus:border-primary focus:outline-none"
+                    className="rounded-lg border border-border bg-card-bg px-3 py-2 text-sm text-text-primary focus:border-gold/40 focus:outline-none transition-colors duration-300"
                 >
                     <option value="all">All Statuses</option>
                     {statusOptions.map(s => (
@@ -57,21 +57,21 @@ export default function OrdersPage() {
             </div>
 
             {/* Table */}
-            <div className="rounded-xl border border-border bg-card-bg overflow-hidden">
+            <div className="rounded-xl border border-border bg-gradient-to-br from-card-bg to-card-bg-elevated overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left">
                         <thead>
                             <tr className="border-b border-border bg-page-bg">
-                                <th className="px-4 py-3 text-xs font-semibold text-text-secondary uppercase tracking-wider">Order ID</th>
-                                <th className="px-4 py-3 text-xs font-semibold text-text-secondary uppercase tracking-wider">Customer</th>
-                                <th className="px-4 py-3 text-xs font-semibold text-text-secondary uppercase tracking-wider">Items</th>
-                                <th className="px-4 py-3 text-xs font-semibold text-text-secondary uppercase tracking-wider">Total</th>
-                                <th className="px-4 py-3 text-xs font-semibold text-text-secondary uppercase tracking-wider">Status</th>
-                                <th className="px-4 py-3 text-xs font-semibold text-text-secondary uppercase tracking-wider">Date</th>
-                                <th className="px-4 py-3 text-xs font-semibold text-text-secondary uppercase tracking-wider text-right">Actions</th>
+                                <th className="px-4 py-3 text-xs font-semibold text-gold-muted uppercase tracking-wider">Order ID</th>
+                                <th className="px-4 py-3 text-xs font-semibold text-gold-muted uppercase tracking-wider">Customer</th>
+                                <th className="px-4 py-3 text-xs font-semibold text-gold-muted uppercase tracking-wider">Items</th>
+                                <th className="px-4 py-3 text-xs font-semibold text-gold-muted uppercase tracking-wider">Total</th>
+                                <th className="px-4 py-3 text-xs font-semibold text-gold-muted uppercase tracking-wider">Status</th>
+                                <th className="px-4 py-3 text-xs font-semibold text-gold-muted uppercase tracking-wider">Date</th>
+                                <th className="px-4 py-3 text-xs font-semibold text-gold-muted uppercase tracking-wider text-right">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-border">
+                        <tbody className="divide-y divide-border-subtle">
                             {filtered.length === 0 ? (
                                 <tr>
                                     <td colSpan={7} className="px-4 py-12 text-center">
@@ -81,16 +81,16 @@ export default function OrdersPage() {
                                 </tr>
                             ) : (
                                 filtered.map(order => (
-                                    <tr key={order.id} className="hover:bg-page-bg/50 transition-colors">
+                                    <tr key={order.id} className="hover:bg-gold/[0.03] transition-all duration-300">
                                         <td className="px-4 py-3 font-mono text-sm font-medium text-text-primary">{order.id}</td>
                                         <td className="px-4 py-3">
                                             <p className="text-sm font-medium text-text-primary">{order.customer_name}</p>
-                                            <p className="text-xs text-text-secondary">{order.customer_email}</p>
+                                            <p className="text-xs text-text-muted">{order.customer_email}</p>
                                         </td>
                                         <td className="px-4 py-3 text-sm text-text-secondary">
                                             {(order.items?.length ?? 0)} item{(order.items?.length ?? 0) > 1 ? 's' : ''}
                                         </td>
-                                        <td className="px-4 py-3 text-sm font-semibold text-text-primary">
+                                        <td className="px-4 py-3 text-sm font-semibold text-gold">
                                             ${order.total.toLocaleString('en-US')}
                                         </td>
                                         <td className="px-4 py-3">
@@ -110,7 +110,7 @@ export default function OrdersPage() {
                                         <td className="px-4 py-3 text-right">
                                             <button
                                                 onClick={() => setSelectedOrder(order)}
-                                                className="rounded-lg p-2 text-text-muted hover:text-info hover:bg-blue-50 transition-colors"
+                                                className="rounded-lg p-2 text-text-muted hover:text-gold hover:bg-gold/[0.08] transition-all duration-300"
                                                 title="View details"
                                             >
                                                 <Eye className="h-4 w-4" />
@@ -126,11 +126,11 @@ export default function OrdersPage() {
 
             {/* Order Detail Modal */}
             {selectedOrder && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setSelectedOrder(null)}>
-                    <div className="w-full max-w-lg mx-4 rounded-2xl border border-border bg-card-bg p-6 shadow-xl" onClick={e => e.stopPropagation()}>
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => setSelectedOrder(null)}>
+                    <div className="w-full max-w-lg mx-4 rounded-2xl border border-border bg-card-bg-elevated p-6 shadow-2xl" onClick={e => e.stopPropagation()}>
                         <div className="flex items-center justify-between mb-4">
-                            <h2 className="font-serif text-lg font-bold text-text-primary">Order {selectedOrder.id}</h2>
-                            <button onClick={() => setSelectedOrder(null)} className="text-text-muted hover:text-text-primary">✕</button>
+                            <h2 className="font-serif text-lg font-bold text-gold-soft">Order {selectedOrder.id}</h2>
+                            <button onClick={() => setSelectedOrder(null)} className="text-text-muted hover:text-gold transition-colors duration-300">✕</button>
                         </div>
 
                         <div className="space-y-3 text-sm">
@@ -141,20 +141,20 @@ export default function OrdersPage() {
                         </div>
 
                         <div className="mt-4 border-t border-border pt-4">
-                            <h3 className="text-sm font-semibold text-text-primary mb-2">Items</h3>
+                            <h3 className="text-sm font-semibold text-gold-soft mb-2">Items</h3>
                             <div className="space-y-2">
                                 {(selectedOrder.items ?? []).map((item, i) => (
                                     <div key={i} className="flex justify-between text-sm">
                                         <span className="text-text-secondary">{item.product_name} × {item.quantity}</span>
-                                        <span className="text-text-primary font-medium">${(item.price * item.quantity).toLocaleString('en-US')}</span>
+                                        <span className="text-gold font-medium">${(item.price * item.quantity).toLocaleString('en-US')}</span>
                                     </div>
                                 ))}
                             </div>
                         </div>
 
                         <div className="mt-4 border-t border-border pt-4 flex justify-between">
-                            <span className="font-serif text-base font-bold text-primary">Total</span>
-                            <span className="font-serif text-base font-bold text-primary">${selectedOrder.total.toLocaleString('en-US')}</span>
+                            <span className="font-serif text-base font-bold text-gold">Total</span>
+                            <span className="font-serif text-base font-bold text-gold">${selectedOrder.total.toLocaleString('en-US')}</span>
                         </div>
                     </div>
                 </div>

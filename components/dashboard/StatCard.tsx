@@ -18,23 +18,22 @@ export default function StatCard({
     value,
     change,
     icon: Icon,
-    color,
     href = '#',
     loading = false,
 }: StatCardProps) {
     const isPositive = (change ?? 0) >= 0;
 
     const content = (
-        <div className="group relative overflow-hidden rounded-2xl border border-border bg-card-bg p-5 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5">
-            {/* Accent bar */}
-            <div className={`absolute top-0 left-0 right-0 h-1 ${color} opacity-80`} />
+        <div className="group relative overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-card-bg to-card-bg-elevated p-5 transition-all duration-300 hover:shadow-xl hover:shadow-black/20 hover:-translate-y-0.5 hover:border-gold/20">
+            {/* Subtle gold accent bar at top */}
+            <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-gold/40 to-transparent opacity-60 group-hover:opacity-100 transition-opacity duration-300" />
 
             <div className="flex items-start justify-between mb-4">
-                <div className={`flex h-11 w-11 items-center justify-center rounded-xl ${color} bg-opacity-10`}>
-                    <Icon className="h-5 w-5 text-white" />
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/30 border border-primary/20">
+                    <Icon className="h-5 w-5 text-gold" />
                 </div>
                 {change !== undefined && (
-                    <div className={`flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold ${isPositive ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'}`}>
+                    <div className={`flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold ${isPositive ? 'bg-success/15 text-success' : 'bg-danger/15 text-danger'}`}>
                         {isPositive ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
                         {isPositive ? '+' : ''}{change}%
                     </div>
@@ -48,7 +47,7 @@ export default function StatCard({
                 </div>
             ) : (
                 <>
-                    <p className="font-serif text-2xl font-bold text-text-primary tracking-tight">
+                    <p className="font-serif text-2xl font-bold text-gold tracking-tight">
                         {value}
                     </p>
                     <p className="mt-0.5 text-xs font-medium text-text-secondary">

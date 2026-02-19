@@ -20,9 +20,9 @@ export default function RevenueBreakdown({
     title = 'Gross Volume',
 }: RevenueBreakdownProps) {
     return (
-        <div className="rounded-2xl border border-border bg-card-bg p-5 sm:p-6">
+        <div className="rounded-2xl border border-border bg-gradient-to-br from-card-bg to-card-bg-elevated p-5 sm:p-6">
             <div className="mb-5">
-                <h3 className="font-serif text-base font-semibold text-text-primary">{title}</h3>
+                <h3 className="font-serif text-base font-semibold text-gold-soft">{title}</h3>
                 <p className="text-xs text-text-muted mt-0.5">Revenue breakdown by payment method</p>
             </div>
 
@@ -38,7 +38,7 @@ export default function RevenueBreakdown({
                 </div>
             ) : (
                 <>
-                    <p className="font-serif text-3xl font-bold text-text-primary mb-6 tracking-tight">
+                    <p className="font-serif text-3xl font-bold text-gold mb-6 tracking-tight">
                         ${total.toLocaleString('en-US')}
                     </p>
 
@@ -52,7 +52,7 @@ export default function RevenueBreakdown({
                                             {item.label}
                                         </span>
                                         <div className="flex items-center gap-2">
-                                            <span className="text-sm font-semibold text-text-primary">
+                                            <span className="text-sm font-semibold text-gold-soft">
                                                 ${item.value.toLocaleString('en-US')}
                                             </span>
                                             <span className="text-xs text-text-muted">
