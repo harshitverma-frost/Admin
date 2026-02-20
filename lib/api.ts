@@ -110,90 +110,46 @@ export async function checkApiHealth(): Promise<boolean> {
 
 export interface Order {
     id: string;
+    order_id?: string;
     customer_name: string;
     customer_email: string;
     items: { product_name: string; quantity: number; price: number }[];
     total: number;
     status: 'pending' | 'confirmed' | 'shipped' | 'delivered' | 'cancelled';
+    payment_status?: string;
     created_at: string;
 }
 
-const MOCK_ORDERS: Order[] = [
-    {
-        id: 'ORD-001',
-        customer_name: 'Emily Carter',
-        customer_email: 'emily.carter@email.com',
-        items: [{ product_name: 'KSP Classic Red', quantity: 2, price: 45 }],
-        total: 90,
-        status: 'confirmed',
-        created_at: '2026-02-10T10:30:00Z',
-    },
-    {
-        id: 'ORD-002',
-        customer_name: 'James Whitfield',
-        customer_email: 'james.w@email.com',
-        items: [
-            { product_name: 'Highland White', quantity: 1, price: 38 },
-            { product_name: 'Sparkling Rosé', quantity: 3, price: 52 },
-        ],
-        total: 194,
-        status: 'shipped',
-        created_at: '2026-02-09T14:15:00Z',
-    },
-    {
-        id: 'ORD-003',
-        customer_name: 'Sofia Martínez',
-        customer_email: 'sofia.m@email.com',
-        items: [{ product_name: 'Reserve Cabernet', quantity: 6, price: 75 }],
-        total: 450,
-        status: 'pending',
-        created_at: '2026-02-11T08:00:00Z',
-    },
-    {
-        id: 'ORD-004',
-        customer_name: 'David Laurent',
-        customer_email: 'david.l@email.com',
-        items: [{ product_name: 'Dalat Merlot', quantity: 1, price: 65 }],
-        total: 65,
-        status: 'delivered',
-        created_at: '2026-02-07T11:45:00Z',
-    },
-];
-
-/** Tries the real API; falls back to mock data.  Normalises backend field names to the UI Order shape. */
+/** Fetches orders from the real API. Returns [] on failure. */
 export async function getOrders(): Promise<Order[]> {
     try {
         const res = await fetch(`${API_URL}/api/orders`);
         if (!res.ok) {
             console.error(`[Admin API] getOrders failed with status: ${res.status}`);
-            return MOCK_ORDERS;
+            return [];
         }
 
         const json: ApiResponse<any[]> = await res.json();
         if (json.success && Array.isArray(json.data)) {
-            // Mapping Logic
             return json.data.map((row: any) => ({
                 id: row.id ?? row.order_id ?? '',
+                order_id: row.order_id,
                 customer_name: row.customer_name ?? 'Unknown',
                 customer_email: row.customer_email ?? '',
                 items: row.items ?? [],
                 total: row.total ?? parseFloat(row.total_amount ?? 0),
                 status: (row.status ?? (row.order_status ?? 'pending')).toLowerCase() as Order['status'],
+                payment_status: row.payment_status,
                 created_at: row.created_at ?? new Date().toISOString(),
             }));
         }
 
         console.warn('[Admin API] getOrders returned invalid data structure:', json);
-        return MOCK_ORDERS;
+        return [];
     } catch (error) {
         console.error('[Admin API] Failed to fetch orders:', error);
-        return MOCK_ORDERS;
+        return [];
     }
-}
-
-/** For backward compat – the mock data function */
-export function getMockOrders(): Order[] {
-    return MOCK_ORDERS;
 }
 
 export async function getOrderById(id: string): Promise<Order | null> {
@@ -202,7 +158,7 @@ export async function getOrderById(id: string): Promise<Order | null> {
         const json: ApiResponse<Order> = await res.json();
         return json.success && json.data ? json.data : null;
     } catch {
-        return MOCK_ORDERS.find(o => o.id === id) || null;
+        return null;
     }
 }
 
