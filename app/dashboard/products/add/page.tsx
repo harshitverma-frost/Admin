@@ -2,13 +2,9 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-<<<<<<< HEAD
-import { createProduct, uploadProductImage } from '@/lib/api';
+import { createProduct, updateStock, uploadProductImage } from '@/lib/api';
 import { getCategories } from '@/lib/api/category';
 import { Category } from '@/types/category';
-=======
-import { createProduct, updateStock, uploadProductImage } from '@/lib/api';
->>>>>>> main
 import { ArrowLeft, Save, Upload, X, ImageIcon } from 'lucide-react';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
@@ -159,7 +155,6 @@ export default function AddProductPage() {
         router.push('/dashboard/products');
     };
 
-<<<<<<< HEAD
     // Separate parent and sub categories for the dropdowns
     const parentCategories = categories.filter(c => !c.parent_id);
     // Find the selected parent's category_id by matching the name stored in form.category
@@ -174,13 +169,11 @@ export default function AddProductPage() {
         update('category', value);
         update('sub_category', ''); // Reset subcategory when parent changes
     };
-=======
-    const categories = ['Red Wine', 'White Wine', 'Rosé', 'Sparkling', 'Dessert Wine', 'Fortified'];
+
     const countries = [
         'France', 'Italy', 'Spain', 'USA', 'Australia',
         'Argentina', 'Chile', 'Germany', 'Portugal', 'India', 'South Africa'
     ];
->>>>>>> main
 
     return (
         <div>
@@ -236,13 +229,8 @@ export default function AddProductPage() {
                                 <label className="block text-sm font-medium text-text-primary mb-1">Category</label>
                                 <select
                                     value={form.category}
-<<<<<<< HEAD
                                     onChange={e => handleCategoryChange(e.target.value)}
                                     className="w-full rounded-lg border border-border px-4 py-2.5 text-sm focus:border-primary focus:outline-none bg-white"
-=======
-                                    onChange={e => update('category', e.target.value)}
-                                    className="w-full rounded-lg border border-border px-4 py-2.5 text-sm focus:border-gold/40 focus:outline-none"
->>>>>>> main
                                 >
                                     <option value="">Select category</option>
                                     {parentCategories.map(cat => (

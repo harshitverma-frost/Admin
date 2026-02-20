@@ -148,19 +148,14 @@ export default function CategoriesPage() {
                     <p className="text-sm text-text-secondary">{categories.length} categories</p>
                 </div>
                 <button
-<<<<<<< HEAD
                     onClick={handleCreate}
                     className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary-dark transition-colors"
-=======
-                    onClick={() => { setShowForm(true); setEditId(null); setForm({ name: '', description: '' }); }}
-                    className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-[#E8D8B9] hover:bg-primary-light border border-gold/10 transition-all duration-300"
->>>>>>> main
+
                 >
                     <Plus className="h-4 w-4" /> Add Category
                 </button>
             </div>
 
-<<<<<<< HEAD
             {/* Filter Tabs */}
             {!loading && categories.length > 0 && (
                 <div className="flex gap-1 mb-5 p-1 bg-page-bg rounded-lg w-fit">
@@ -169,61 +164,20 @@ export default function CategoriesPage() {
                             key={tab.key}
                             onClick={() => setFilter(tab.key)}
                             className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${filter === tab.key
-                                    ? 'bg-white text-text-primary shadow-sm'
-                                    : 'text-text-secondary hover:text-text-primary'
+                                ? 'bg-white text-text-primary shadow-sm'
+                                : 'text-text-secondary hover:text-text-primary'
                                 }`}
                         >
                             {tab.label}
                             <span className="ml-1.5 text-text-muted">({tab.count})</span>
                         </button>
                     ))}
-=======
-            {/* Form */}
-            {showForm && (
-                <div className="mb-6 rounded-xl border border-border bg-gradient-to-br from-card-bg to-card-bg-elevated p-5">
-                    <h3 className="font-serif text-sm font-semibold text-gold-soft mb-4">
-                        {editId ? 'Edit Category' : 'New Category'}
-                    </h3>
-                    <div className="grid gap-4 sm:grid-cols-2">
-                        <div>
-                            <label className="block text-sm font-medium text-text-primary mb-1">Name</label>
-                            <input
-                                type="text"
-                                value={form.name}
-                                onChange={e => setForm({ ...form, name: e.target.value })}
-                                className="w-full rounded-lg border border-border px-4 py-2.5 text-sm focus:border-gold/40 focus:outline-none transition-colors duration-300"
-                                placeholder="Category name"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-text-primary mb-1">Description</label>
-                            <input
-                                type="text"
-                                value={form.description}
-                                onChange={e => setForm({ ...form, description: e.target.value })}
-                                className="w-full rounded-lg border border-border px-4 py-2.5 text-sm focus:border-gold/40 focus:outline-none transition-colors duration-300"
-                                placeholder="Brief description"
-                            />
-                        </div>
-                    </div>
-                    <div className="mt-4 flex gap-2">
-                        <button onClick={handleSave}
-                            className="rounded-lg bg-primary px-5 py-2 text-sm font-semibold text-[#E8D8B9] hover:bg-primary-light border border-gold/10 transition-all duration-300">
-                            {editId ? 'Update' : 'Add'}
-                        </button>
-                        <button onClick={() => { setShowForm(false); setEditId(null); }}
-                            className="rounded-lg border border-border px-5 py-2 text-sm font-medium text-text-secondary hover:text-gold hover:border-gold/30 transition-all duration-300">
-                            Cancel
-                        </button>
-                    </div>
->>>>>>> main
                 </div>
             )}
 
             {/* Loading Skeleton */}
             {loading && (
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-<<<<<<< HEAD
                     {Array.from({ length: 6 }).map((_, i) => (
                         <div key={i} className="rounded-xl border border-border bg-card-bg p-5 space-y-3">
                             <div className="flex items-start justify-between">
@@ -236,28 +190,7 @@ export default function CategoriesPage() {
                             <div className="h-5 w-2/3 rounded animate-shimmer" />
                             <div className="h-3 w-full rounded animate-shimmer" />
                             <div className="h-3 w-1/3 rounded animate-shimmer" />
-=======
-                    {categories.map(cat => (
-                        <div key={cat.id} className="rounded-xl border border-border bg-gradient-to-br from-card-bg to-card-bg-elevated p-5 transition-all duration-300 hover:shadow-lg hover:shadow-black/20 hover:border-gold/15 hover:-translate-y-0.5">
-                            <div className="flex items-start justify-between mb-3">
-                                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/20 border border-primary/15">
-                                    <Tag className="h-5 w-5 text-gold" />
-                                </div>
-                                <div className="flex gap-1">
-                                    <button onClick={() => handleEdit(cat)}
-                                        className="rounded-lg p-1.5 text-text-muted hover:text-gold hover:bg-gold/[0.08] transition-all duration-300">
-                                        <Pencil className="h-3.5 w-3.5" />
-                                    </button>
-                                    <button onClick={() => handleDelete(cat.id, cat.name)}
-                                        className="rounded-lg p-1.5 text-text-muted hover:text-danger hover:bg-danger/[0.08] transition-all duration-300">
-                                        <Trash2 className="h-3.5 w-3.5" />
-                                    </button>
-                                </div>
-                            </div>
-                            <h3 className="font-serif text-base font-semibold text-gold-soft">{cat.name}</h3>
-                            <p className="mt-0.5 text-xs text-text-secondary">{cat.description}</p>
-                            <p className="mt-3 text-xs font-medium text-gold-muted">{cat.product_count ?? 0} products</p>
->>>>>>> main
+
                         </div>
                     ))}
                 </div>
