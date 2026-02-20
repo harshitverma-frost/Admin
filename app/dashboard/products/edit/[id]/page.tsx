@@ -207,6 +207,13 @@ export default function EditProductPage({ params }: Props) {
         }
     };
 
+    const countries = [
+        'Argentina', 'Australia', 'Austria', 'Brazil', 'Canada', 'Chile',
+        'China', 'France', 'Germany', 'Greece', 'Hungary', 'India', 'Israel',
+        'Italy', 'Japan', 'Mexico', 'New Zealand', 'Portugal', 'South Africa',
+        'Spain', 'United Kingdom', 'United States', 'Uruguay',
+    ];
+
     const parentCategories = categories.filter(c => !c.parent_id);
     // Find the selected parent's category_id by matching the name stored in form.category
     const selectedParent = categories.find(c => !c.parent_id && c.name === form.category);
