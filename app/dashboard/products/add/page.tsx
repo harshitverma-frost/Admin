@@ -2,12 +2,17 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+<<<<<<< HEAD
 import { createProduct, uploadProductImage } from '@/lib/api';
 import { getCategories } from '@/lib/api/category';
 import { Category } from '@/types/category';
+=======
+import { createProduct, updateStock, uploadProductImage } from '@/lib/api';
+>>>>>>> main
 import { ArrowLeft, Save, Upload, X, ImageIcon } from 'lucide-react';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
+import StockControl from '@/components/StockControl';
 
 interface ImagePreview {
     file: File;
@@ -33,6 +38,7 @@ export default function AddProductPage() {
         intended_use: '',
         price: '',
         quantity: '',
+        country_of_origin: '',
     });
 
     // Fetch categories from API
@@ -107,12 +113,22 @@ export default function AddProductPage() {
             intended_use: form.intended_use || undefined,
             price: form.price ? parseFloat(form.price) : undefined,
             quantity: form.quantity ? parseInt(form.quantity) : undefined,
+            country_of_origin: form.country_of_origin || undefined,
         });
 
         if (!result.success) {
             setLoading(false);
             toast.error(result.error || 'Failed to create product');
             return;
+        }
+
+        // Set initial stock quantity if provided
+        const initialQty = form.quantity ? parseInt(form.quantity) : 0;
+        if (initialQty > 0 && result.product?.product_id) {
+            const stockOk = await updateStock(result.product.product_id, initialQty);
+            if (!stockOk) {
+                toast.error('Product created but failed to set initial stock');
+            }
         }
 
         // Upload images if any were selected
@@ -143,6 +159,7 @@ export default function AddProductPage() {
         router.push('/dashboard/products');
     };
 
+<<<<<<< HEAD
     // Separate parent and sub categories for the dropdowns
     const parentCategories = categories.filter(c => !c.parent_id);
     // Find the selected parent's category_id by matching the name stored in form.category
@@ -157,24 +174,31 @@ export default function AddProductPage() {
         update('category', value);
         update('sub_category', ''); // Reset subcategory when parent changes
     };
+=======
+    const categories = ['Red Wine', 'White Wine', 'Rosé', 'Sparkling', 'Dessert Wine', 'Fortified'];
+    const countries = [
+        'France', 'Italy', 'Spain', 'USA', 'Australia',
+        'Argentina', 'Chile', 'Germany', 'Portugal', 'India', 'South Africa'
+    ];
+>>>>>>> main
 
     return (
         <div>
             <div className="flex items-center gap-3 mb-6">
-                <Link href="/dashboard/products" className="rounded-lg border border-border p-2 hover:bg-card-bg transition-colors">
-                    <ArrowLeft className="h-4 w-4 text-text-secondary" />
+                <Link href="/dashboard/products" className="rounded-lg border border-border p-2 hover:bg-gold/[0.06] hover:border-gold/20 transition-all duration-300">
+                    <ArrowLeft className="h-4 w-4 text-text-muted" />
                 </Link>
                 <div>
-                    <h1 className="font-serif text-2xl font-bold text-text-primary">Add New Product</h1>
+                    <h1 className="font-serif text-2xl font-bold text-gold-soft">Add New Product</h1>
                     <p className="text-sm text-text-secondary">Fill in the details to create a new wine product</p>
                 </div>
             </div>
 
             <form onSubmit={handleSubmit} className="max-w-3xl">
-                <div className="rounded-xl border border-border bg-card-bg p-6 space-y-6">
+                <div className="rounded-xl border border-border bg-gradient-to-br from-card-bg to-card-bg-elevated p-6 space-y-6">
                     {/* Basic Info */}
                     <div>
-                        <h3 className="font-serif text-sm font-semibold text-text-primary mb-4">Basic Information</h3>
+                        <h3 className="font-serif text-sm font-semibold text-gold-soft mb-4">Basic Information</h3>
                         <div className="grid gap-4 sm:grid-cols-2">
                             <div>
                                 <label className="block text-sm font-medium text-text-primary mb-1">SKU *</label>
@@ -182,7 +206,7 @@ export default function AddProductPage() {
                                     type="text"
                                     value={form.sku}
                                     onChange={e => update('sku', e.target.value)}
-                                    className="w-full rounded-lg border border-border px-4 py-2.5 text-sm focus:border-primary focus:outline-none"
+                                    className="w-full rounded-lg border border-border px-4 py-2.5 text-sm focus:border-gold/40 focus:outline-none"
                                     placeholder="WINE-001"
                                     required
                                 />
@@ -212,8 +236,13 @@ export default function AddProductPage() {
                                 <label className="block text-sm font-medium text-text-primary mb-1">Category</label>
                                 <select
                                     value={form.category}
+<<<<<<< HEAD
                                     onChange={e => handleCategoryChange(e.target.value)}
                                     className="w-full rounded-lg border border-border px-4 py-2.5 text-sm focus:border-primary focus:outline-none bg-white"
+=======
+                                    onChange={e => update('category', e.target.value)}
+                                    className="w-full rounded-lg border border-border px-4 py-2.5 text-sm focus:border-gold/40 focus:outline-none"
+>>>>>>> main
                                 >
                                     <option value="">Select category</option>
                                     {parentCategories.map(cat => (
@@ -255,6 +284,20 @@ export default function AddProductPage() {
                                     placeholder="750ml"
                                 />
                             </div>
+                            <div>
+                                <label className="block text-sm font-medium text-text-primary mb-1">Country of Origin *</label>
+                                <select
+                                    value={form.country_of_origin}
+                                    onChange={e => update('country_of_origin', e.target.value)}
+                                    className="w-full rounded-lg border border-border px-4 py-2.5 text-sm focus:border-gold/40 focus:outline-none"
+                                    required
+                                >
+                                    <option value="">Select country</option>
+                                    {countries.map(c => (
+                                        <option key={c} value={c}>{c}</option>
+                                    ))}
+                                </select>
+                            </div>
                         </div>
                     </div>
 
@@ -284,7 +327,7 @@ export default function AddProductPage() {
 
                     {/* Pricing */}
                     <div>
-                        <h3 className="font-serif text-sm font-semibold text-text-primary mb-4">Pricing & Stock</h3>
+                        <h3 className="font-serif text-sm font-semibold text-gold-soft mb-4">Pricing & Stock</h3>
                         <div className="grid gap-4 sm:grid-cols-2">
                             <div>
                                 <label className="block text-sm font-medium text-text-primary mb-1">Price ($)</label>
@@ -297,13 +340,13 @@ export default function AddProductPage() {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-text-primary mb-1">Stock Quantity</label>
-                                <input
-                                    type="number"
-                                    value={form.quantity}
-                                    onChange={e => update('quantity', e.target.value)}
-                                    className="w-full rounded-lg border border-border px-4 py-2.5 text-sm focus:border-primary focus:outline-none"
-                                    placeholder="100"
+                                <StockControl
+                                    value={parseInt(form.quantity) || 0}
+                                    onChange={(val) => update('quantity', String(val))}
+                                    min={0}
+                                    size="md"
+                                    showLabel
+                                    label="Stock Quantity"
                                 />
                             </div>
                         </div>
@@ -311,12 +354,12 @@ export default function AddProductPage() {
 
                     {/* Product Images */}
                     <div>
-                        <h3 className="font-serif text-sm font-semibold text-text-primary mb-4">Product Images</h3>
+                        <h3 className="font-serif text-sm font-semibold text-gold-soft mb-4">Product Images</h3>
                         <div
                             onDrop={handleDrop}
                             onDragOver={e => e.preventDefault()}
                             onClick={() => fileInputRef.current?.click()}
-                            className="border-2 border-dashed border-border rounded-xl p-8 text-center cursor-pointer hover:border-primary hover:bg-primary/5 transition-all"
+                            className="border-2 border-dashed border-border rounded-xl p-8 text-center cursor-pointer hover:border-gold/40 hover:bg-gold/[0.04] transition-all duration-300"
                         >
                             <Upload className="h-8 w-8 text-text-secondary mx-auto mb-3" />
                             <p className="text-sm font-medium text-text-primary">Click to upload or drag & drop</p>
@@ -335,7 +378,7 @@ export default function AddProductPage() {
                         {images.length > 0 && (
                             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-4">
                                 {images.map((img, index) => (
-                                    <div key={index} className="relative group rounded-lg overflow-hidden border border-border bg-white">
+                                    <div key={index} className="relative group rounded-lg overflow-hidden border border-border bg-card-bg-elevated">
                                         <img
                                             src={img.preview}
                                             alt={img.file.name}
@@ -344,14 +387,14 @@ export default function AddProductPage() {
                                         <button
                                             type="button"
                                             onClick={() => removeImage(index)}
-                                            className="absolute top-1.5 right-1.5 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity shadow-md"
+                                            className="absolute top-1.5 right-1.5 bg-danger text-gold-soft rounded-full p-1 opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-md"
                                         >
                                             <X className="h-3.5 w-3.5" />
                                         </button>
                                         <div className="px-2 py-1.5">
                                             <p className="text-xs text-text-secondary truncate">{img.file.name}</p>
                                             {index === 0 && (
-                                                <span className="text-[10px] font-semibold text-primary">Primary</span>
+                                                <span className="text-[10px] font-semibold text-gold">Primary</span>
                                             )}
                                         </div>
                                     </div>
@@ -366,14 +409,14 @@ export default function AddProductPage() {
                     <button
                         type="submit"
                         disabled={loading || uploadingImages}
-                        className="flex items-center gap-2 rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-white hover:bg-primary-dark transition-colors disabled:opacity-50"
+                        className="flex items-center gap-2 rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-[#E8D8B9] hover:bg-primary-light border border-gold/10 transition-all duration-300 disabled:opacity-50"
                     >
                         <Save className="h-4 w-4" />
                         {uploadingImages ? 'Uploading Images...' : loading ? 'Creating...' : 'Create Product'}
                     </button>
                     <Link
                         href="/dashboard/products"
-                        className="rounded-lg border border-border px-6 py-3 text-sm font-medium text-text-secondary hover:bg-card-bg transition-colors"
+                        className="rounded-lg border border-border px-6 py-3 text-sm font-medium text-text-secondary hover:text-gold hover:border-gold/30 transition-all duration-300"
                     >
                         Cancel
                     </Link>

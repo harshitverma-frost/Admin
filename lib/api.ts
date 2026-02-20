@@ -24,6 +24,8 @@ export interface Product {
     intended_use?: string;
     price?: number;
     quantity?: number;
+    stock_quantity?: number;
+    country_of_origin?: string;
     images?: string[];
     created_at?: string;
     updated_at?: string;
@@ -35,7 +37,13 @@ export async function getProducts(): Promise<Product[]> {
     try {
         const res = await fetch(`${API_URL}/api/products`);
         const json: ApiResponse<Product[]> = await res.json();
-        return json.success && json.data ? json.data : [];
+        const products = json.success && json.data ? json.data : [];
+
+        // Map stock_quantity (from DB) to quantity (used by frontend)
+        return products.map(p => ({
+            ...p,
+            quantity: p.stock_quantity ?? p.quantity ?? 0,
+        }));
     } catch (error) {
         console.error('[Admin API] Failed to fetch products:', error);
         return [];
@@ -44,9 +52,18 @@ export async function getProducts(): Promise<Product[]> {
 
 export async function getProduct(id: string): Promise<Product | null> {
     try {
-        const res = await fetch(`${API_URL}/api/products/${id}`);
-        const json: ApiResponse<Product> = await res.json();
-        return json.success && json.data ? json.data : null;
+        // Use details endpoint to get product + variants (for stock quantity)
+        const res = await fetch(`${API_URL}/api/products/${id}/details`);
+        const json: ApiResponse<any> = await res.json();
+        if (json.success && json.data) {
+            const product = json.data;
+            // Prefer stock_quantity from product, fallback to variant
+            const stockQty = product.stock_quantity
+                ?? product.variants?.[0]?.stock_quantity
+                ?? 0;
+            return { ...product, quantity: stockQty };
+        }
+        return null;
     } catch (error) {
         console.error('[Admin API] Failed to fetch product:', error);
         return null;
@@ -227,8 +244,12 @@ export async function updateStock(productId: string, quantity: number): Promise<
             body: JSON.stringify({ quantity }),
         });
         const json: ApiResponse = await res.json();
+        if (!json.success) {
+            console.error('[Admin API] Stock update failed:', json.message);
+        }
         return json.success;
-    } catch {
+    } catch (error) {
+        console.error('[Admin API] Failed to update stock:', error);
         return false;
     }
 }
@@ -317,6 +338,112 @@ export async function setPrimaryImage(productId: string, assetId: string): Promi
         return json.success;
     } catch {
         return false;
+    }
+}
+
+// ─── Auth / Account Management ────────────────────────────────────
+
+export interface LoginResult {
+    success: boolean;
+    error?: string;
+    deactivated?: boolean;
+    customer?: { customer_id: string; full_name: string; email: string };
+    access_token?: string;
+    refresh_token?: string;
+}
+
+/**
+ * Login via the real backend.
+ * Returns { deactivated: true } when the account is inactive,
+ * so the UI can display the reactivation modal.
+ */
+export async function loginUser(email: string, password: string): Promise<LoginResult> {
+    try {
+        const res = await fetch(`${API_URL}/api/auth/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ email, password }),
+        });
+        const json = await res.json();
+
+        // Detect deactivated account — backend may return 403 or specific message
+        if (!json.success) {
+            const msg = (json.message || '').toLowerCase();
+            const isDeactivated =
+                msg.includes('deactivat') ||
+                msg.includes('inactive') ||
+                msg.includes('account_deactivated') ||
+                res.status === 451;
+            return {
+                success: false,
+                error: json.message || 'Login failed',
+                deactivated: isDeactivated,
+            };
+        }
+
+        return {
+            success: true,
+            customer: json.data?.customer,
+            access_token: json.data?.access_token,
+            refresh_token: json.data?.refresh_token,
+        };
+    } catch (error) {
+        console.error('[Admin API] Login failed:', error);
+        return { success: false, error: 'Network error. Please try again.' };
+    }
+}
+
+/**
+ * Deactivate the current user's account.
+ * Requires the user's password for verification.
+ */
+export async function deactivateAccount(password: string, token?: string): Promise<{ success: boolean; error?: string }> {
+    try {
+        const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+
+        const res = await fetch(`${API_URL}/api/auth/deactivate`, {
+            method: 'POST',
+            headers,
+            credentials: 'include',
+            body: JSON.stringify({ password }),
+        });
+        const json = await res.json();
+        return { success: json.success, error: json.message };
+    } catch (error) {
+        console.error('[Admin API] Deactivation failed:', error);
+        return { success: false, error: 'Network error. Please try again.' };
+    }
+}
+
+/**
+ * Reactivate a deactivated account, then re-login.
+ * Calls POST /api/auth/reactivate, then POST /api/auth/login.
+ */
+export async function reactivateAccount(email: string, password: string): Promise<LoginResult> {
+    try {
+        // Step 1: Call reactivation endpoint
+        const reactivateRes = await fetch(`${API_URL}/api/auth/reactivate`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ email, password }),
+        });
+        const reactivateJson = await reactivateRes.json();
+
+        if (!reactivateJson.success) {
+            return {
+                success: false,
+                error: reactivateJson.message || 'Failed to reactivate account',
+            };
+        }
+
+        // Step 2: Login normally after reactivation
+        return await loginUser(email, password);
+    } catch (error) {
+        console.error('[Admin API] Reactivation failed:', error);
+        return { success: false, error: 'Network error. Please try again.' };
     }
 }
 

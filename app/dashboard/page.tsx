@@ -40,7 +40,7 @@ export default function DashboardPage() {
             value: loading ? '—' : `$${totalRevenue.toLocaleString('en-US')}`,
             change: 12.5,
             icon: TrendingUp,
-            color: 'bg-emerald-500',
+            color: 'bg-primary',
             href: '/dashboard/orders',
         },
         {
@@ -48,7 +48,7 @@ export default function DashboardPage() {
             value: loading ? '—' : orders.length,
             change: 8.2,
             icon: ShoppingCart,
-            color: 'bg-blue-500',
+            color: 'bg-primary',
             href: '/dashboard/orders',
         },
         {
@@ -56,14 +56,14 @@ export default function DashboardPage() {
             value: loading ? '—' : products.length,
             change: 3.1,
             icon: Package,
-            color: 'bg-violet-500',
+            color: 'bg-primary',
             href: '/dashboard/products',
         },
         {
             title: 'Categories',
             value: loading ? '—' : categories.length,
             icon: Tag,
-            color: 'bg-amber-500',
+            color: 'bg-primary',
             href: '/dashboard/categories',
         },
     ], [loading, totalRevenue, orders.length, products.length, categories.length]);
@@ -80,27 +80,26 @@ export default function DashboardPage() {
         return Object.entries(monthMap).map(([label, value]) => ({ label, value }));
     }, [orders]);
 
-    // Revenue breakdown from orders
+    // Revenue breakdown — muted luxury colors
     const revenueBreakdown = useMemo(() => {
-        // Derive from orders — split proportionally for demo
         const cod = Math.round(totalRevenue * 0.4);
         const online = Math.round(totalRevenue * 0.45);
         const inStore = totalRevenue - cod - online;
         return [
-            { label: 'Online Payments', value: online, color: 'bg-primary' },
-            { label: 'Cash on Delivery', value: cod, color: 'bg-amber-500' },
-            { label: 'In-store Purchases', value: inStore, color: 'bg-emerald-500' },
+            { label: 'Online Payments', value: online, color: 'bg-gold' },
+            { label: 'Cash on Delivery', value: cod, color: 'bg-primary-light' },
+            { label: 'In-store Purchases', value: inStore, color: 'bg-plum' },
         ];
     }, [totalRevenue]);
 
-    // Order status badge
+    // Order status badge — muted, refined dark colors
     const getStatusClasses = (status: string) => {
         switch (status) {
-            case 'confirmed': return 'bg-green-50 text-green-700';
-            case 'shipped': return 'bg-blue-50 text-blue-700';
-            case 'delivered': return 'bg-purple-50 text-purple-700';
-            case 'pending': return 'bg-yellow-50 text-yellow-700';
-            default: return 'bg-red-50 text-red-700';
+            case 'confirmed': return 'bg-success/15 text-success';
+            case 'shipped': return 'bg-info/15 text-info';
+            case 'delivered': return 'bg-gold/15 text-gold';
+            case 'pending': return 'bg-warning/15 text-warning';
+            default: return 'bg-danger/15 text-danger';
         }
     };
 
@@ -149,14 +148,14 @@ export default function DashboardPage() {
             {/* Recent Orders & Products */}
             <div className="grid gap-6 lg:grid-cols-2">
                 {/* Recent Orders */}
-                <div className="rounded-2xl border border-border bg-card-bg animate-fadeInUp" style={{ animationDelay: '560ms' }}>
+                <div className="rounded-2xl border border-border bg-gradient-to-br from-card-bg to-card-bg-elevated animate-fadeInUp" style={{ animationDelay: '560ms' }}>
                     <div className="flex items-center justify-between border-b border-border px-5 py-4">
-                        <h2 className="font-serif text-base font-semibold text-text-primary">Recent Orders</h2>
-                        <Link href="/dashboard/orders" className="text-xs font-medium text-primary hover:text-primary-dark transition-colors">
+                        <h2 className="font-serif text-base font-semibold text-gold-soft">Recent Orders</h2>
+                        <Link href="/dashboard/orders" className="text-xs font-medium text-gold-muted hover:text-gold transition-colors duration-300">
                             View All →
                         </Link>
                     </div>
-                    <div className="divide-y divide-border">
+                    <div className="divide-y divide-border-subtle">
                         {loading ? (
                             Array.from({ length: 4 }).map((_, i) => (
                                 <div key={i} className="flex items-center justify-between px-5 py-3.5">
@@ -171,13 +170,13 @@ export default function DashboardPage() {
                             <div className="px-5 py-12 text-center text-sm text-text-muted">No orders yet</div>
                         ) : (
                             orders.slice(0, 5).map(order => (
-                                <div key={order.id} className="flex items-center justify-between px-5 py-3.5 hover:bg-page-bg/50 transition-colors">
+                                <div key={order.id} className="flex items-center justify-between px-5 py-3.5 hover:bg-gold/[0.03] transition-all duration-300">
                                     <div>
                                         <p className="text-sm font-medium text-text-primary">{order.customer_name}</p>
                                         <p className="text-xs text-text-muted mt-0.5">{order.id}</p>
                                     </div>
                                     <div className="text-right">
-                                        <p className="text-sm font-semibold text-text-primary">${order.total.toLocaleString('en-US')}</p>
+                                        <p className="text-sm font-semibold text-gold">${order.total.toLocaleString('en-US')}</p>
                                         <span className={`inline-block rounded-full px-2 py-0.5 text-[10px] font-semibold mt-0.5 ${getStatusClasses(order.status)}`}>
                                             {order.status}
                                         </span>
@@ -189,22 +188,22 @@ export default function DashboardPage() {
                 </div>
 
                 {/* Recent Products */}
-                <div className="rounded-2xl border border-border bg-card-bg animate-fadeInUp" style={{ animationDelay: '640ms' }}>
+                <div className="rounded-2xl border border-border bg-gradient-to-br from-card-bg to-card-bg-elevated animate-fadeInUp" style={{ animationDelay: '640ms' }}>
                     <div className="flex items-center justify-between border-b border-border px-5 py-4">
-                        <h2 className="font-serif text-base font-semibold text-text-primary">Recent Products</h2>
+                        <h2 className="font-serif text-base font-semibold text-gold-soft">Recent Products</h2>
                         <div className="flex items-center gap-3">
-                            <Link href="/dashboard/products" className="text-xs font-medium text-primary hover:text-primary-dark transition-colors">
+                            <Link href="/dashboard/products" className="text-xs font-medium text-gold-muted hover:text-gold transition-colors duration-300">
                                 View All →
                             </Link>
                             <Link
                                 href="/dashboard/products/add"
-                                className="flex items-center gap-1 rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-white hover:bg-primary-dark transition-colors"
+                                className="flex items-center gap-1 rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-[#E8D8B9] hover:bg-primary-light border border-gold/10 transition-all duration-300"
                             >
                                 <Plus className="h-3 w-3" /> Add
                             </Link>
                         </div>
                     </div>
-                    <div className="divide-y divide-border">
+                    <div className="divide-y divide-border-subtle">
                         {loading ? (
                             Array.from({ length: 5 }).map((_, i) => (
                                 <div key={i} className="flex items-center gap-3 px-5 py-3.5">
@@ -220,7 +219,7 @@ export default function DashboardPage() {
                                 <p className="text-sm text-text-muted mb-3">No products yet</p>
                                 <Link
                                     href="/dashboard/products/add"
-                                    className="inline-flex items-center gap-1 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary-dark transition-colors"
+                                    className="inline-flex items-center gap-1 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-[#E8D8B9] hover:bg-primary-light border border-gold/10 transition-all duration-300"
                                 >
                                     <Plus className="h-4 w-4" /> Add First Product
                                 </Link>
@@ -230,9 +229,9 @@ export default function DashboardPage() {
                                 <Link
                                     key={product.product_id}
                                     href={`/dashboard/products/${product.product_id}`}
-                                    className="flex items-center gap-3 px-5 py-3.5 hover:bg-page-bg/50 transition-colors group"
+                                    className="flex items-center gap-3 px-5 py-3.5 hover:bg-gold/[0.03] transition-all duration-300 group"
                                 >
-                                    <div className="h-10 w-10 flex-shrink-0 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/10 flex items-center justify-center">
+                                    <div className="h-10 w-10 flex-shrink-0 rounded-xl bg-primary/20 border border-primary/15 flex items-center justify-center">
                                         {product.images && product.images.length > 0 ? (
                                             <img
                                                 src={product.images[0]}
@@ -244,16 +243,16 @@ export default function DashboardPage() {
                                         )}
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <p className="text-sm font-medium text-text-primary truncate group-hover:text-primary transition-colors">
+                                        <p className="text-sm font-medium text-text-primary truncate group-hover:text-gold transition-colors duration-300">
                                             {product.product_name}
                                         </p>
                                         <p className="text-xs text-text-muted">{product.sku}</p>
                                     </div>
                                     <div className="flex items-center gap-2">
-                                        <p className="text-sm font-semibold text-text-primary">
+                                        <p className="text-sm font-semibold text-gold">
                                             ${(product.price ?? 0).toLocaleString('en-US')}
                                         </p>
-                                        <ArrowUpRight className="h-3.5 w-3.5 text-text-muted opacity-0 group-hover:opacity-100 transition-opacity" />
+                                        <ArrowUpRight className="h-3.5 w-3.5 text-text-muted opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                                     </div>
                                 </Link>
                             ))
