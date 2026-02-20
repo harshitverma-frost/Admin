@@ -105,6 +105,7 @@ export default function ProductsListPage() {
                                 <th className="px-4 py-3 text-xs font-semibold text-gold-muted uppercase tracking-wider">SKU</th>
                                 <th className="px-4 py-3 text-xs font-semibold text-gold-muted uppercase tracking-wider">Category</th>
                                 <th className="px-4 py-3 text-xs font-semibold text-gold-muted uppercase tracking-wider">Price</th>
+                                <th className="px-4 py-3 text-xs font-semibold text-gold-muted uppercase tracking-wider">ABV %</th>
                                 <th className="px-4 py-3 text-xs font-semibold text-gold-muted uppercase tracking-wider">Stock</th>
                                 <th className="px-4 py-3 text-xs font-semibold text-gold-muted uppercase tracking-wider text-right">Actions</th>
                             </tr>
@@ -113,14 +114,14 @@ export default function ProductsListPage() {
                             {loading ? (
                                 Array.from({ length: 5 }).map((_, i) => (
                                     <tr key={i}>
-                                        <td colSpan={6} className="px-4 py-4">
+                                        <td colSpan={7} className="px-4 py-4">
                                             <div className="h-5 animate-shimmer rounded" />
                                         </td>
                                     </tr>
                                 ))
                             ) : filtered.length === 0 ? (
                                 <tr>
-                                    <td colSpan={6} className="px-4 py-12 text-center">
+                                    <td colSpan={7} className="px-4 py-12 text-center">
                                         <Package className="mx-auto h-10 w-10 text-text-muted/40 mb-2" />
                                         <p className="text-sm text-text-muted">No products found</p>
                                     </td>
@@ -151,6 +152,9 @@ export default function ProductsListPage() {
                                         </td>
                                         <td className="px-4 py-3 text-sm font-medium text-gold">
                                             ${(product.price ?? 0).toLocaleString('en-US')}
+                                        </td>
+                                        <td className="px-4 py-3 text-sm text-text-secondary font-medium tabular-nums">
+                                            {product.alcohol_percentage != null ? `${product.alcohol_percentage}%` : '—'}
                                         </td>
                                         <td className="px-4 py-3">
                                             <div>

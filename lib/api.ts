@@ -26,6 +26,7 @@ export interface Product {
     quantity?: number;
     stock_quantity?: number;
     country_of_origin?: string;
+    alcohol_percentage?: number;
     images?: string[];
     created_at?: string;
     updated_at?: string;
