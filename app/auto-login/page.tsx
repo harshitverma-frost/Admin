@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Wine } from 'lucide-react';
 
@@ -12,7 +12,7 @@ import { Wine } from 'lucide-react';
  *
  * URL: /auto-login?token=<jwt>&email=<email>&name=<name>&id=<customer_id>
  */
-export default function AutoLoginPage() {
+function AutoLoginContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const [status, setStatus] = useState('Authenticating...');
@@ -75,5 +75,28 @@ export default function AutoLoginPage() {
                 </div>
             </div>
         </div>
+    );
+}
+
+export default function AutoLoginPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-page-bg flex items-center justify-center px-4">
+                <div className="text-center">
+                    <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary-light shadow-2xl shadow-primary/30 border border-gold/15 animate-pulse">
+                        <Wine className="h-8 w-8 text-gold" />
+                    </div>
+                    <h1 className="font-serif text-xl font-bold text-gold-soft tracking-wide mb-2">
+                        Admin Panel
+                    </h1>
+                    <p className="text-sm text-text-secondary">Loading...</p>
+                    <div className="mt-4 flex justify-center">
+                        <div className="w-8 h-8 border-2 border-gold/30 border-t-gold rounded-full animate-spin" />
+                    </div>
+                </div>
+            </div>
+        }>
+            <AutoLoginContent />
+        </Suspense>
     );
 }
