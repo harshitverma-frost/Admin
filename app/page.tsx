@@ -31,6 +31,13 @@ export default function AdminLoginPage() {
     return null;
   }
 
+  // Redirect to Storefront login (single unified login page)
+  if (typeof window !== 'undefined') {
+    const STOREFRONT_URL = process.env.NEXT_PUBLIC_STOREFRONT_URL || 'http://localhost:3000';
+    window.location.href = `${STOREFRONT_URL}/login?logout=true`;
+    return null;
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);

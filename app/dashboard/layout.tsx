@@ -24,7 +24,10 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     }
 
     if (!isAuthenticated) {
-        router.push('/');
+        if (typeof window !== 'undefined') {
+            const STOREFRONT_URL = process.env.NEXT_PUBLIC_STOREFRONT_URL || 'http://localhost:3000';
+            window.location.href = `${STOREFRONT_URL}/login?logout=true`;
+        }
         return null;
     }
 
