@@ -25,16 +25,10 @@ export default function AdminLoginPage() {
     if (isAuthenticated) {
       router.push('/dashboard');
     }
+
   }, [isAuthenticated, router]);
 
   if (isAuthenticated) {
-    return null;
-  }
-
-  // Redirect to Storefront login (single unified login page)
-  if (typeof window !== 'undefined') {
-    const STOREFRONT_URL = process.env.NEXT_PUBLIC_STOREFRONT_URL || 'http://localhost:3000';
-    window.location.href = `${STOREFRONT_URL}/login?logout=true`;
     return null;
   }
 

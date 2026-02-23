@@ -4,7 +4,19 @@
  * Response format: { success: boolean, message: string, data: T }
  */
 
+import { getToken } from '@/lib/auth';
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+
+/** Build headers object that includes the stored JWT Bearer token */
+function authHeaders(extra?: Record<string, string>): Record<string, string> {
+    const headers: Record<string, string> = { ...extra };
+    const token = getToken();
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+    return headers;
+}
 
 export interface ApiResponse<T = unknown> {
     success: boolean;
@@ -27,6 +39,7 @@ export interface Product {
     stock_quantity?: number;
     country_of_origin?: string;
     images?: string[];
+    specifications?: any;
     created_at?: string;
     updated_at?: string;
 }
@@ -35,14 +48,26 @@ export interface Product {
 
 export async function getProducts(): Promise<Product[]> {
     try {
-        const res = await fetch(`${API_URL}/api/products`);
-        const json: ApiResponse<Product[]> = await res.json();
-        const products = json.success && json.data ? json.data : [];
+        const res = await fetch(`${API_URL}/api/products`, {
+            headers: authHeaders(),
+        });
+        const json: ApiResponse<any> = await res.json();
+
+        // Backend returns { data: { products: [...], meta: {...} } }
+        let products: Product[] = [];
+        if (json.success && json.data) {
+            if (Array.isArray(json.data)) {
+                products = json.data;
+            } else if (Array.isArray(json.data.products)) {
+                products = json.data.products;
+            }
+        }
 
         // Map stock_quantity (from DB) to quantity (used by frontend)
-        return products.map(p => ({
+        return products.map((p: any) => ({
             ...p,
             quantity: p.stock_quantity ?? p.quantity ?? 0,
+            images: p.thumbnail_base64 ? [p.thumbnail_base64] : []
         }));
     } catch (error) {
         console.error('[Admin API] Failed to fetch products:', error);
@@ -53,7 +78,9 @@ export async function getProducts(): Promise<Product[]> {
 export async function getProduct(id: string): Promise<Product | null> {
     try {
         // Use details endpoint to get product + variants (for stock quantity)
-        const res = await fetch(`${API_URL}/api/products/${id}/details`);
+        const res = await fetch(`${API_URL}/api/products/${id}/details`, {
+            headers: authHeaders(),
+        });
         const json: ApiResponse<any> = await res.json();
         if (json.success && json.data) {
             const product = json.data;
@@ -61,7 +88,10 @@ export async function getProduct(id: string): Promise<Product | null> {
             const stockQty = product.stock_quantity
                 ?? product.variants?.[0]?.stock_quantity
                 ?? 0;
-            return { ...product, quantity: stockQty };
+            const images = product.assets
+                ?.map((a: any) => a.base64_data || a.asset_url)
+                .filter(Boolean) || [];
+            return { ...product, quantity: stockQty, images };
         }
         return null;
     } catch (error) {
@@ -74,7 +104,7 @@ export async function createProduct(product: Partial<Product>): Promise<{ succes
     try {
         const res = await fetch(`${API_URL}/api/products`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: authHeaders({ 'Content-Type': 'application/json' }),
             body: JSON.stringify(product),
         });
         const json: ApiResponse<Product> = await res.json();
@@ -92,7 +122,7 @@ export async function updateProduct(id: string, product: Partial<Product>): Prom
     try {
         const res = await fetch(`${API_URL}/api/products/${id}`, {
             method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
+            headers: authHeaders({ 'Content-Type': 'application/json' }),
             body: JSON.stringify(product),
         });
         const json: ApiResponse = await res.json();
@@ -105,7 +135,10 @@ export async function updateProduct(id: string, product: Partial<Product>): Prom
 
 export async function deleteProduct(id: string): Promise<boolean> {
     try {
-        const res = await fetch(`${API_URL}/api/products/${id}`, { method: 'DELETE' });
+        const res = await fetch(`${API_URL}/api/products/${id}`, {
+            method: 'DELETE',
+            headers: authHeaders(),
+        });
         const json: ApiResponse = await res.json();
         return json.success;
     } catch (error) {
@@ -140,29 +173,46 @@ export interface Order {
 /** Fetches orders from the real API. Returns [] on failure. */
 export async function getOrders(): Promise<Order[]> {
     try {
-        const res = await fetch(`${API_URL}/api/orders`);
+        const res = await fetch(`${API_URL}/api/orders`, {
+            headers: authHeaders(),
+            credentials: 'include',
+        });
         if (!res.ok) {
             console.error(`[Admin API] getOrders failed with status: ${res.status}`);
             return [];
         }
 
-        const json: ApiResponse<any[]> = await res.json();
-        if (json.success && Array.isArray(json.data)) {
-            return json.data.map((row: any) => ({
-                id: row.id ?? row.order_id ?? '',
-                order_id: row.order_id,
-                customer_name: row.customer_name ?? 'Unknown',
-                customer_email: row.customer_email ?? '',
-                items: row.items ?? [],
-                total: row.total ?? parseFloat(row.total_amount ?? 0),
-                status: (row.status ?? (row.order_status ?? 'pending')).toLowerCase() as Order['status'],
-                payment_status: row.payment_status,
-                created_at: row.created_at ?? new Date().toISOString(),
-            }));
+        const json: ApiResponse<any> = await res.json();
+        if (!json.success) {
+            console.warn('[Admin API] getOrders returned unsuccessful:', json);
+            return [];
         }
 
-        console.warn('[Admin API] getOrders returned invalid data structure:', json);
-        return [];
+        // Backend returns { data: { orders: [...], meta: {...} } }
+        let rawOrders: any[] = [];
+        if (json.data) {
+            if (Array.isArray(json.data)) {
+                rawOrders = json.data;
+            } else if (Array.isArray(json.data.orders)) {
+                rawOrders = json.data.orders;
+            }
+        }
+
+        return rawOrders.map((row: any) => ({
+            id: row.order_id ?? row.id ?? '',
+            order_id: row.order_id,
+            customer_name: row.customer_name ?? 'Unknown',
+            customer_email: row.customer_email ?? '',
+            items: Array.isArray(row.items) ? row.items.map((item: any) => ({
+                product_name: item.product_name ?? 'Unknown Product',
+                quantity: item.quantity ?? 1,
+                price: parseFloat(item.unit_price ?? item.price ?? 0),
+            })) : [],
+            total: parseFloat(row.total_amount ?? row.total ?? 0),
+            status: (row.order_status ?? row.status ?? 'pending').toLowerCase() as Order['status'],
+            payment_status: row.payment_status,
+            created_at: row.created_at ?? new Date().toISOString(),
+        }));
     } catch (error) {
         console.error('[Admin API] Failed to fetch orders:', error);
         return [];
@@ -171,9 +221,30 @@ export async function getOrders(): Promise<Order[]> {
 
 export async function getOrderById(id: string): Promise<Order | null> {
     try {
-        const res = await fetch(`${API_URL}/api/orders/${id}`);
-        const json: ApiResponse<Order> = await res.json();
-        return json.success && json.data ? json.data : null;
+        const res = await fetch(`${API_URL}/api/orders/${id}`, {
+            headers: authHeaders(),
+            credentials: 'include',
+        });
+        const json: ApiResponse<any> = await res.json();
+        if (json.success && json.data) {
+            const row = json.data;
+            return {
+                id: row.order_id ?? row.id ?? '',
+                order_id: row.order_id,
+                customer_name: row.customer_name ?? 'Unknown',
+                customer_email: row.customer_email ?? '',
+                items: Array.isArray(row.items) ? row.items.map((item: any) => ({
+                    product_name: item.product_name ?? 'Unknown Product',
+                    quantity: item.quantity ?? 1,
+                    price: parseFloat(item.unit_price ?? item.price ?? 0),
+                })) : [],
+                total: parseFloat(row.total_amount ?? row.total ?? 0),
+                status: (row.order_status ?? row.status ?? 'pending').toLowerCase() as Order['status'],
+                payment_status: row.payment_status,
+                created_at: row.created_at ?? new Date().toISOString(),
+            };
+        }
+        return null;
     } catch {
         return null;
     }
@@ -183,7 +254,8 @@ export async function updateOrderStatus(id: string, status: string): Promise<boo
     try {
         const res = await fetch(`${API_URL}/api/orders/${id}/status`, {
             method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
+            headers: authHeaders({ 'Content-Type': 'application/json' }),
+            credentials: 'include',
             body: JSON.stringify({ order_status: status.toUpperCase() }),
         });
         const json: ApiResponse = await res.json();
@@ -197,7 +269,8 @@ export async function updatePaymentStatus(id: string, paymentStatus: string): Pr
     try {
         const res = await fetch(`${API_URL}/api/orders/${id}/payment`, {
             method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
+            headers: authHeaders({ 'Content-Type': 'application/json' }),
+            credentials: 'include',
             body: JSON.stringify({ payment_status: paymentStatus }),
         });
         const json: ApiResponse = await res.json();
@@ -223,7 +296,7 @@ export async function duplicateProduct(id: string, newSku: string, newName: stri
     try {
         const res = await fetch(`${API_URL}/api/products/${id}/duplicate`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: authHeaders({ 'Content-Type': 'application/json' }),
             body: JSON.stringify({ newSku, newName }),
         });
         const json: ApiResponse<Product> = await res.json();
@@ -240,7 +313,7 @@ export async function updateStock(productId: string, quantity: number): Promise<
     try {
         const res = await fetch(`${API_URL}/api/products/${productId}/stock`, {
             method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
+            headers: authHeaders({ 'Content-Type': 'application/json' }),
             body: JSON.stringify({ quantity }),
         });
         const json: ApiResponse = await res.json();
@@ -256,7 +329,9 @@ export async function updateStock(productId: string, quantity: number): Promise<
 
 export async function getLowStockProducts(): Promise<Product[]> {
     try {
-        const res = await fetch(`${API_URL}/api/products/low-stock-alerts`);
+        const res = await fetch(`${API_URL}/api/products/low-stock-alerts`, {
+            headers: authHeaders(),
+        });
         const json: ApiResponse<Product[]> = await res.json();
         return json.success && json.data ? json.data : [];
     } catch {
@@ -270,7 +345,7 @@ export async function adjustInventory(data: { product_id: string; quantity_chang
     try {
         const res = await fetch(`${API_URL}/api/inventory/adjust`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: authHeaders({ 'Content-Type': 'application/json' }),
             body: JSON.stringify(data),
         });
         const json: ApiResponse = await res.json();
@@ -282,7 +357,9 @@ export async function adjustInventory(data: { product_id: string; quantity_chang
 
 export async function getStockHistory(productId: string) {
     try {
-        const res = await fetch(`${API_URL}/api/inventory/history/${productId}`);
+        const res = await fetch(`${API_URL}/api/inventory/history/${productId}`, {
+            headers: authHeaders(),
+        });
         const json: ApiResponse = await res.json();
         return json.success && json.data ? json.data : [];
     } catch {
@@ -301,7 +378,7 @@ export async function uploadProductImage(productId: string, base64Image: string,
     try {
         const res = await fetch(`${API_URL}/api/products/${productId}/images`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: authHeaders({ 'Content-Type': 'application/json' }),
             body: JSON.stringify({ image: base64Image, ...options }),
         });
         const json: ApiResponse = await res.json();
@@ -323,7 +400,10 @@ export async function getProductImages(productId: string) {
 
 export async function deleteProductImage(productId: string, assetId: string): Promise<boolean> {
     try {
-        const res = await fetch(`${API_URL}/api/products/${productId}/images/${assetId}`, { method: 'DELETE' });
+        const res = await fetch(`${API_URL}/api/products/${productId}/images/${assetId}`, {
+            method: 'DELETE',
+            headers: authHeaders(),
+        });
         const json: ApiResponse = await res.json();
         return json.success;
     } catch {
@@ -333,7 +413,10 @@ export async function deleteProductImage(productId: string, assetId: string): Pr
 
 export async function setPrimaryImage(productId: string, assetId: string): Promise<boolean> {
     try {
-        const res = await fetch(`${API_URL}/api/products/${productId}/images/${assetId}/primary`, { method: 'PATCH' });
+        const res = await fetch(`${API_URL}/api/products/${productId}/images/${assetId}/primary`, {
+            method: 'PATCH',
+            headers: authHeaders(),
+        });
         const json: ApiResponse = await res.json();
         return json.success;
     } catch {
@@ -347,7 +430,7 @@ export interface LoginResult {
     success: boolean;
     error?: string;
     deactivated?: boolean;
-    customer?: { customer_id: string; full_name: string; email: string };
+    customer?: { customer_id: string; full_name: string; email: string; role?: string };
     access_token?: string;
     refresh_token?: string;
 }
@@ -446,4 +529,3 @@ export async function reactivateAccount(email: string, password: string): Promis
         return { success: false, error: 'Network error. Please try again.' };
     }
 }
-

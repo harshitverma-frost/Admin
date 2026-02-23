@@ -5,8 +5,17 @@
  */
 
 import { Category, CreateCategoryPayload, UpdateCategoryPayload } from '@/types/category';
+import { getToken } from '@/lib/auth';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+
+/** Build headers with auth token for admin endpoints */
+function authHeaders(extra?: Record<string, string>): Record<string, string> {
+    const headers: Record<string, string> = { ...extra };
+    const token = getToken();
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    return headers;
+}
 
 interface ApiResponse<T = unknown> {
     success: boolean;
@@ -47,7 +56,7 @@ export async function createCategory(
     try {
         const res = await fetch(`${API_URL}/api/categories`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: authHeaders({ 'Content-Type': 'application/json' }),
             body: JSON.stringify(payload),
         });
         const json: ApiResponse<Category> = await res.json();
@@ -70,7 +79,7 @@ export async function updateCategory(
     try {
         const res = await fetch(`${API_URL}/api/categories/${id}`, {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
+            headers: authHeaders({ 'Content-Type': 'application/json' }),
             body: JSON.stringify(payload),
         });
         const json: ApiResponse<Category> = await res.json();
@@ -90,6 +99,7 @@ export async function deleteCategory(id: string): Promise<{ success: boolean; er
     try {
         const res = await fetch(`${API_URL}/api/categories/${id}`, {
             method: 'DELETE',
+            headers: authHeaders(),
         });
         const json: ApiResponse = await res.json();
         if (json.success) {
