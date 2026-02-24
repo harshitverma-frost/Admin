@@ -44,6 +44,44 @@ export interface Product {
     updated_at?: string;
 }
 
+/* ─── Customers ─── */
+
+export interface Customer {
+    customer_id: string;
+    full_name: string;
+    email: string;
+    phone?: string;
+    date_of_birth?: string;
+    role: string;
+    is_email_verified: boolean;
+    is_mobile_verified: boolean;
+    is_age_verified: boolean;
+    is_active: boolean;
+    is_suspended: boolean;
+    is_banned: boolean;
+    is_deleted: boolean;
+    created_at: string;
+    updated_at?: string;
+    last_login_at?: string;
+}
+
+export async function getCustomers(): Promise<Customer[]> {
+    try {
+        const res = await fetch(`${API_URL}/api/admin/customers`, {
+            headers: authHeaders(),
+            credentials: 'include',
+        });
+        const json: ApiResponse<any> = await res.json();
+        if (json.success && json.data?.customers) {
+            return json.data.customers;
+        }
+        return [];
+    } catch (error) {
+        console.error('[Admin API] Failed to fetch customers:', error);
+        return [];
+    }
+}
+
 /* ─── Products ─── */
 
 export async function getProducts(): Promise<Product[]> {

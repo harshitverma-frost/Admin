@@ -17,7 +17,7 @@ const mainNav = [
 ];
 
 const secondaryNav = [
-    { href: '#', label: 'Customers', icon: Users },
+    { href: '/dashboard/customers', label: 'Customers', icon: Users },
     { href: '#', label: 'Delivery', icon: Truck },
     { href: '#', label: 'Promotions', icon: Megaphone },
 ];
