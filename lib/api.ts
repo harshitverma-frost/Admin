@@ -36,6 +36,7 @@ export interface Product {
     intended_use?: string;
     price?: number;
     quantity?: number;
+    alcohol_percentage?: number;
     stock_quantity?: number;
     country_of_origin?: string;
     images?: string[];
@@ -104,7 +105,8 @@ export async function getProducts(): Promise<Product[]> {
         // Map stock_quantity (from DB) to quantity (used by frontend)
         return products.map((p: any) => ({
             ...p,
-            quantity: p.stock_quantity ?? p.quantity ?? 0,
+            quantity: p.variant_stock ?? p.stock_quantity ?? p.quantity ?? 0,
+            alcohol_percentage: p.alcohol_percentage ?? null,
             images: p.thumbnail_base64 ? [p.thumbnail_base64] : []
         }));
     } catch (error) {
@@ -122,14 +124,18 @@ export async function getProduct(id: string): Promise<Product | null> {
         const json: ApiResponse<any> = await res.json();
         if (json.success && json.data) {
             const product = json.data;
-            // Prefer stock_quantity from product, fallback to variant
-            const stockQty = product.stock_quantity
-                ?? product.variants?.[0]?.stock_quantity
-                ?? 0;
+            // Prefer variant stock (source of truth) over products table stock
+            const variantStock = product.variants?.[0]?.stock_quantity;
+            const stockQty = variantStock != null ? variantStock
+                : (product.stock_quantity != null ? product.stock_quantity : 0);
+            // Prefer alcohol_percentage from product, fallback to variant
+            const abv = product.alcohol_percentage
+                ?? product.variants?.[0]?.alcohol_percentage
+                ?? null;
             const images = product.assets
                 ?.map((a: any) => a.base64_data || a.asset_url)
                 .filter(Boolean) || [];
-            return { ...product, quantity: stockQty, images };
+            return { ...product, quantity: stockQty, alcohol_percentage: abv, images };
         }
         return null;
     } catch (error) {

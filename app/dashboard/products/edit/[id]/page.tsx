@@ -79,6 +79,7 @@ export default function EditProductPage({ params }: Props) {
         intended_use: '',
         price: '',
         country_of_origin: '',
+        alcohol_percentage: '',
         length_cm: '',
         width_cm: '',
         height_cm: '',
@@ -103,6 +104,7 @@ export default function EditProductPage({ params }: Props) {
                     intended_use: product.intended_use || '',
                     price: product.price != null ? String(product.price) : '',
                     country_of_origin: product.country_of_origin || product.specifications?.country_of_origin || '',
+                    alcohol_percentage: product.alcohol_percentage != null ? String(product.alcohol_percentage) : '',
                     length_cm: product.specifications?.length_cm != null ? String(product.specifications.length_cm) : '',
                     width_cm: product.specifications?.width_cm != null ? String(product.specifications.width_cm) : '',
                     height_cm: product.specifications?.height_cm != null ? String(product.specifications.height_cm) : '',
@@ -247,6 +249,8 @@ export default function EditProductPage({ params }: Props) {
             unit_of_measure: form.unit_of_measure || undefined,
             intended_use: form.intended_use || undefined,
             price: form.price ? parseFloat(form.price) : undefined,
+            alcohol_percentage: form.alcohol_percentage !== '' ? parseFloat(form.alcohol_percentage) : undefined,
+            quantity: stockValue,
             specifications: {
                 country_of_origin: form.country_of_origin || undefined,
                 length_cm: form.length_cm ? parseFloat(form.length_cm) : undefined,
@@ -549,6 +553,23 @@ export default function EditProductPage({ params }: Props) {
                                             </div>
                                         )}
                                     </div>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-text-primary mb-1">ABV (%)</label>
+                                    <div className="relative">
+                                        <input
+                                            type="number"
+                                            step="0.1"
+                                            min="0"
+                                            max="100"
+                                            value={form.alcohol_percentage}
+                                            onChange={e => update('alcohol_percentage', e.target.value)}
+                                            className="w-full rounded-lg border border-border pl-4 pr-14 py-2.5 text-sm focus:border-primary focus:outline-none"
+                                            placeholder="e.g. 13.5"
+                                        />
+                                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-medium text-text-muted">% ABV</span>
+                                    </div>
+                                    <p className="text-xs text-text-muted mt-1">Alcohol by Volume percentage (0–100)</p>
                                 </div>
                             </div>
                         </div>

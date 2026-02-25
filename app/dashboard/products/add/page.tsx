@@ -49,6 +49,7 @@ export default function AddProductPage() {
         // Inventory & Pricing
         price: '',
         quantity: '',
+        alcohol_percentage: '',
         // Dimensions
         length_cm: '',
         width_cm: '',
@@ -139,7 +140,8 @@ export default function AddProductPage() {
             unit_of_measure: form.unit_of_measure || undefined,
             intended_use: form.intended_use || undefined,
             price: form.price ? parseFloat(form.price) : undefined,
-            quantity: form.quantity ? parseInt(form.quantity) : undefined,
+            quantity: form.quantity !== '' ? parseInt(form.quantity) : undefined,
+            alcohol_percentage: form.alcohol_percentage !== '' ? parseFloat(form.alcohol_percentage) : undefined,
             specifications: {
                 country_of_origin: form.country_of_origin || undefined,
                 length_cm: form.length_cm ? parseFloat(form.length_cm) : undefined,
@@ -156,7 +158,7 @@ export default function AddProductPage() {
         }
 
         // Set initial stock quantity if provided
-        const initialQty = form.quantity ? parseInt(form.quantity) : 0;
+        const initialQty = form.quantity !== '' ? parseInt(form.quantity) : 0;
         if (initialQty > 0 && result.product?.product_id) {
             const stockOk = await updateStock(result.product.product_id, initialQty);
             if (!stockOk) {
@@ -479,6 +481,23 @@ export default function AddProductPage() {
                                         showLabel
                                         label="Initial Stock Quantity"
                                     />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-text-primary mb-1">ABV (%)</label>
+                                    <div className="relative">
+                                        <input
+                                            type="number"
+                                            step="0.1"
+                                            min="0"
+                                            max="100"
+                                            value={form.alcohol_percentage}
+                                            onChange={e => update('alcohol_percentage', e.target.value)}
+                                            className="w-full rounded-lg border border-border pl-4 pr-14 py-2.5 text-sm focus:border-primary focus:outline-none"
+                                            placeholder="e.g. 13.5"
+                                        />
+                                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-medium text-text-muted">% ABV</span>
+                                    </div>
+                                    <p className="text-xs text-text-muted mt-1">Alcohol by Volume percentage (0–100)</p>
                                 </div>
                             </div>
                         </div>
