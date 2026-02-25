@@ -201,7 +201,7 @@ export interface Order {
     order_id?: string;
     customer_name: string;
     customer_email: string;
-    items: { product_name: string; quantity: number; price: number }[];
+    items: { product_name?: string; quantity: number; price: number }[];
     total: number;
     status: 'pending' | 'confirmed' | 'shipped' | 'delivered' | 'cancelled';
     payment_status?: string;
@@ -236,21 +236,35 @@ export async function getOrders(): Promise<Order[]> {
             }
         }
 
-        return rawOrders.map((row: any) => ({
-            id: row.order_id ?? row.id ?? '',
-            order_id: row.order_id,
-            customer_name: row.customer_name ?? 'Unknown',
-            customer_email: row.customer_email ?? '',
-            items: Array.isArray(row.items) ? row.items.map((item: any) => ({
-                product_name: item.product_name ?? 'Unknown Product',
-                quantity: item.quantity ?? 1,
-                price: parseFloat(item.unit_price ?? item.price ?? 0),
-            })) : [],
-            total: parseFloat(row.total_amount ?? row.total ?? 0),
-            status: (row.order_status ?? row.status ?? 'pending').toLowerCase() as Order['status'],
-            payment_status: row.payment_status,
-            created_at: row.created_at ?? new Date().toISOString(),
-        }));
+        return rawOrders.map((row: any) => {
+            // The backend's index route (findAllOrders) returns item_count instead of an items array
+            const itemCount = parseInt(row.item_count || row.items?.length || 0);
+
+            // Create a dummy items array so items.length works in the frontend
+            const dummyItems = Array.from({ length: itemCount }).map(() => ({
+                product_name: 'Item',
+                quantity: 1,
+                price: 0
+            }));
+
+            return {
+                id: row.order_id ?? row.id ?? '',
+                order_id: row.order_id,
+                customer_name: row.customer_name ?? 'Unknown',
+                customer_email: row.customer_email ?? '',
+                items: Array.isArray(row.items) && row.items.length > 0
+                    ? row.items.map((item: any) => ({
+                        product_name: item.product_name ?? 'Unknown Product',
+                        quantity: item.quantity ?? 1,
+                        price: parseFloat(item.unit_price ?? item.price ?? 0),
+                    }))
+                    : dummyItems,
+                total: parseFloat(row.total_amount ?? row.total ?? 0),
+                status: (row.order_status ?? row.status ?? 'pending').toLowerCase() as Order['status'],
+                payment_status: row.payment_status,
+                created_at: row.created_at ?? new Date().toISOString(),
+            };
+        });
     } catch (error) {
         console.error('[Admin API] Failed to fetch orders:', error);
         return [];
@@ -269,18 +283,26 @@ export async function getOrderById(id: string): Promise<Order | null> {
             return {
                 id: row.order_id ?? row.id ?? '',
                 order_id: row.order_id,
-                customer_name: row.customer_name ?? 'Unknown',
+                // customer info may not be on the single-order row — caller merges from list
+                customer_name: row.customer_name ?? '',
                 customer_email: row.customer_email ?? '',
+                // Preserve full nested item structure (product, variant objects)
                 items: Array.isArray(row.items) ? row.items.map((item: any) => ({
-                    product_name: item.product_name ?? 'Unknown Product',
-                    quantity: item.quantity ?? 1,
+                    ...item,
+                    // Flat aliases so both the old and new modal paths work
+                    product_name: item.product?.product_name ?? item.product_name ?? '',
                     price: parseFloat(item.unit_price ?? item.price ?? 0),
                 })) : [],
                 total: parseFloat(row.total_amount ?? row.total ?? 0),
                 status: (row.order_status ?? row.status ?? 'pending').toLowerCase() as Order['status'],
                 payment_status: row.payment_status,
                 created_at: row.created_at ?? new Date().toISOString(),
-            };
+                // Extra fields the detail modal needs
+                ...(row.total_tax != null ? { total_tax: parseFloat(row.total_tax) } : {}),
+                ...(row.grand_total != null ? { grand_total: parseFloat(row.grand_total) } : {}),
+                ...(row.order_notes ? { order_notes: row.order_notes } : {}),
+                ...(row.shipping_address ? { shipping_address: row.shipping_address } : {}),
+            } as any;
         }
         return null;
     } catch {
